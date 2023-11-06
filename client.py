@@ -8,9 +8,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
     user_input = input("What would you like to say?")
     s.sendall(user_input.encode('utf-8'))
-    s.sendall("\n")
+    s.sendall(b"\n")
     if user_input == "":
-        s.sendall("\n")
+        s.sendall(b"\n")
     data = s.recv(1024) # when recieving must specify how many bytes to recieve
+    data = data.decode("utf-8")
+
 
 print(f"Received {data!r}")
