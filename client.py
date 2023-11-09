@@ -16,8 +16,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     data = data.decode("utf-8")
     while True:
         user_input = input("enter a message\n")
+        if(user_input == "close"):
+            break
         s.sendall(user_name.encode('utf-8'))
         s.sendall(b"\n")
         data = s.recv(1024) # when recieving must specify how many bytes to recieve
         data = data.decode("utf-8")
-    print(f"Received {data!r}")
+
+    s.close()
