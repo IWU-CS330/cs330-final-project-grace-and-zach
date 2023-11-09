@@ -1,9 +1,12 @@
-CREATE DATABASE database;
+drop table if exists names;
+drop table if exists chatrooms;
 
 CREATE TABLE names (
-    ID int,
-    username varchar(80),
-    PRIMARY KEY (ID)
-)
+    name_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT
+);
 
-SELECT * from names;
+CREATE TABLE chatrooms (
+    chatroom_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chat_name TEXT
+);
