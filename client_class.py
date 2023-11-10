@@ -8,7 +8,7 @@ def names():
     return "7  names".encode('utf-8')
 
 def help():
-    help = """Current commands available:
+    return """Current commands available:
     set_name: sets username
     names: returns list of all users
     close: closes connection
