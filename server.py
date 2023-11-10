@@ -42,8 +42,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 break
 
             data_list = data.split()
+            print(data_list)
         
-            if data_list[1] == 'name':
+            if data_list[1] == 'set_username':
                 # put name in names table
                 name = str(data_list[2])
                 db.execute('INSERT INTO names (username) VALUES (?)', [name])
@@ -54,10 +55,24 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             elif data_list[1] == 'names':   
                 # print out a list of all of the names
                 cur = db.execute('SELECT username from names')
+                list_message = ""
+                count = 0
                 for username in cur.fetchall():
                     username = username[0]
                     print(username)
-                    conn.sendall(username.encode('utf-8'))
-                conn.sendall('stop'.encode('utf-8'))
+                    if len(cur.fetchall()) == 1 or count == len(cur.fetchall()):
+                        list_message = list_message + username 
+                    else:
+                        list_message = username + "," + list_message
+                    count = count + 1
+                conn.sendall(list_message.encode('utf-8'))
 
+            elif data_list[1] == 'message':
+                conn.sendall(data_list[2].encode('utf-8'))
+
+            elif data_list[1] == 'close':
+                s.close()
+                break
+
+                
           
