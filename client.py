@@ -12,10 +12,15 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         if user_name != "":
             break
     s.sendall(client_class.set_username(user_name))
-    s.sendall(b"\n")
-    s.sendall(client_class.names())
+    #s.sendall(b"\n")
+    
     data = s.recv(1024) # when recieving must specify how many bytes to recieve
     data = data.decode("utf-8")
+    print(data)
+    s.sendall(client_class.names())
+    data = s.recv(1024)
+    data = data.decode("utf-8")
+    print("Here is a list of usernames from our current users:", data)
     print(client_class.help())
     while True:
         user_input = input("enter a message\n")
@@ -24,10 +29,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             break
         if(user_input == "names"):
             s.sendall(client_class.names())
+            data = s.recv(1024)
+            data = data.decode("utf-8")
+            print("Here is a list of usernames from our current users:", data)
         if(user_input == "help"):
             print(client_class.help())
-        s.sendall(user_name.encode('utf-8'))
-        s.sendall(b"\n")
+        s.sendall(user_input.encode('utf-8'))
+        #s.sendall(b"\n")
         data = s.recv(1024) # when recieving must specify how many bytes to recieve
         data = data.decode("utf-8")
 

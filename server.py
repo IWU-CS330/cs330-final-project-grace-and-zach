@@ -36,11 +36,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         while True:
             data = conn.recv(1024)
             data = data.decode("utf-8")
+            
 
             if not data or data == '\n':
                 break
 
             data_list = data.split()
+            print(data_list)
 
             if data_list[1] == 'name':
                 # put name in names table
