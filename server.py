@@ -58,6 +58,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     username = username[0]
                     print(username)
                     conn.sendall(username.encode('utf-8'))
-                conn.sendall('stop'.encode('utf-8'))
+                #conn.sendall('stop'.encode('utf-8'))
 
           
