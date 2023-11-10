@@ -26,17 +26,19 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         user_input = input("enter a message\n")
         if(user_input == "close"):
             s.sendall(client_class.close_connection())
+            print("Connection Closed")
             break
-        if(user_input == "names"):
+        elif(user_input == "names"):
             s.sendall(client_class.names())
             data = s.recv(1024)
             data = data.decode("utf-8")
             print("Here is a list of usernames from our current users:", data)
-        if(user_input == "help"):
+        elif(user_input == "help"):
             print(client_class.help())
-        s.sendall(user_input.encode('utf-8'))
-        #s.sendall(b"\n")
-        data = s.recv(1024) # when recieving must specify how many bytes to recieve
-        data = data.decode("utf-8")
+        else:
+            s.sendall(client_class.message(user_input).encode('utf-8'))
+            s.sendall(b"\n")
+            data = s.recv(1024) # when recieving must specify how many bytes to recieve
+            data = data.decode("utf-8")
 
     s.close()
