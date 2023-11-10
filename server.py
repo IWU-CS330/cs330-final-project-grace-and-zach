@@ -42,8 +42,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 break
 
             data_list = data.split()
-            print(data_list)
-
+        
             if data_list[1] == 'name':
                 # put name in names table
                 name = str(data_list[2])
