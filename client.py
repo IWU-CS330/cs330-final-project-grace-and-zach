@@ -36,7 +36,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         elif(user_input == "help"):
             print(client_class.help())
         else:
-            s.sendall(client_class.message(user_input).encode('utf-8'))
+            s.sendall(client_class.message(user_input))
             s.sendall(b"\n")
             data = s.recv(1024) # when recieving must specify how many bytes to recieve
             data = data.decode("utf-8")
