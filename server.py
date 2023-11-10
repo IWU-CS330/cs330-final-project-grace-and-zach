@@ -3,6 +3,7 @@
 import socket
 import sqlite3
 
+
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 #HOST  = "0.0.0.0" #Listen to all interfaces
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
