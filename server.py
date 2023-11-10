@@ -73,6 +73,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             elif data_list[1] == 'close':
                 s.close()
                 break
-
                 
-          
+
+
