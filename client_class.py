@@ -14,8 +14,8 @@ def help():
     close: closes connection
     help: lists all commands"""
 
-def message(message):
-    message = "  message  " + message
+def message(message, username):
+    message = "  message  " + username + ": " + message
     message = str(len(message)) + ' ' + message
     return message.encode('utf-8')
 
