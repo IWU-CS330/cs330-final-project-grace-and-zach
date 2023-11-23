@@ -14,6 +14,13 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
     allow_reuse_address = True
 
+with open('names.sql', 'r') as schema:
+            script = schema.read()
+db = sqlite3.connect('names.db', check_same_thread=False)
+cur = db.cursor()
+cur.executescript(script)
+db.commit()
+
 class ChatRoom(socketserver.StreamRequestHandler):
     print("Do we get to ChatRoom?")
     def handle(self):
@@ -32,14 +39,6 @@ class ChatRoom(socketserver.StreamRequestHandler):
             #we can tell if we got connected from here
         client = f'{self.client_address} on {threading.currentThread().getName()}'
         print(f'Connected: {client}')
-
-        with open('names.sql', 'r') as schema:
-            script = schema.read()
-        
-        db = sqlite3.connect('names.db')
-        cur = db.cursor()
-        cur.executescript(script)
-        db.commit()
       
 
         #s.bind((HOST, PORT))
@@ -58,7 +57,8 @@ class ChatRoom(socketserver.StreamRequestHandler):
             
             #print("Here is My Data:", self.rfile.readline())
             data = self.rfile.readline()
-            
+            #self.rfile.readline()
+            print("Here is my data undecoded", data)
             data = data.decode("utf-8")
             print("Here is my data:", data)
             
@@ -74,7 +74,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
             if data_list[1] == 'set_username':
                 # put name in names table
                 name = str(data_list[2])
-                db.execute('INSERT INTO names (username) VALUES (?,?)', [name, "default"])
+                db.execute('INSERT INTO names (username) VALUES (?)', [name])
                 db.commit()
                 self.wfile.write(('Welcome '+ name).encode('utf-8'))
             
