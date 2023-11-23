@@ -6,11 +6,12 @@ HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 65432  # The port used by the server
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
+    s.connect((HOST, 59898))
     while True:
         user_name = input("What is your name\n")
         if user_name != "":
             break
+
     s.sendall(client_class.set_username(user_name))
     #s.sendall(b"\n")
     
@@ -22,6 +23,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     data = data.decode("utf-8")
     print("Here is a list of usernames from our current users:", data)
     print(client_class.help())
+    
     while True:
         user_input = input("enter a message\n")
         if(user_input == "close"):
@@ -40,5 +42,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.sendall(b"\n")
             data = s.recv(1024) # when recieving must specify how many bytes to recieve
             data = data.decode("utf-8")
+        
 
     s.close()
