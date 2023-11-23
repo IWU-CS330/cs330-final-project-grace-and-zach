@@ -5,7 +5,7 @@ def set_username(user_name):
     return user_name.encode('utf-8')
 
 def names():
-    return "7  names".encode('utf-8')
+    return "7  names \n".encode('utf-8')
 
 def help():
     return """Current commands available:
