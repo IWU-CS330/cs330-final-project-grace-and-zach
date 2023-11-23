@@ -11,16 +11,18 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         user_name = input("What is your name\n")
         if user_name != "":
             break
-
+    user_name = user_name + "\n" 
     s.sendall(client_class.set_username(user_name))
     #s.sendall(b"\n")
     
     data = s.recv(1024) # when recieving must specify how many bytes to recieve
     data = data.decode("utf-8")
     print(data)
+
     s.sendall(client_class.names())
     data = s.recv(1024)
     data = data.decode("utf-8")
+
     print("Here is a list of usernames from our current users:", data)
     print(client_class.help())
     
