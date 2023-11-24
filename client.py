@@ -15,12 +15,11 @@ def receive_messages(socket):
         print(f"{data.decode('utf-8')}")
 
 def client_startup(socket):
-    client_class.set_socket(socket)
     while True:
         username = input("What is your name\n")
         if username != "":
             break
-    s.sendall(client_class.set_username(username))
+    client_class.set_username_socket(username, socket)
     client_class.help()
     while True:
         user_input = input("enter a message\n")

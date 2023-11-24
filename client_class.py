@@ -4,12 +4,10 @@ class clientclass:
     def __init__(self):
             self.self.username = None
             self.socket = None
-            self.room = False
+            self.room = False       
 
-    def set_socket(self, socket):
+    def set_username_socket(self, username, socket):
         self.socket = socket
-
-    def set_username(self, username):
         self.username = username
         self.username = "  set_username  " + self.username
         self.username = str(len(self.username)) + self.username
