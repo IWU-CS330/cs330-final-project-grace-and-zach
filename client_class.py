@@ -2,16 +2,16 @@ import socket
 
 class clientclass:
     def __init__(self):
-            self.self.username = None
+            self.username = None
             self.socket = None
             self.room = False       
 
     def set_username_socket(self, username, socket):
         self.socket = socket
         self.username = username
-        self.username = "  set_username  " + self.username
-        self.username = str(len(self.username)) + self.username
-        self.socket.sendall(self.username.encode('utf-8')) 
+        username = "  set_username  " + self.username
+        username = str(len(self.username)) + self.username
+        self.socket.sendall(username.encode('utf-8')) 
 
     def list_names(self):
         self.socket.sendall("7  names".encode('utf-8'))
@@ -22,7 +22,6 @@ class clientclass:
         rooms: lists rooms
         join: joins chatroom
         create: creates a chatroom
-        add: adds user to your room
         leave: leaves room you are in
         close: closes connection
         help: lists all commands""")
@@ -35,11 +34,6 @@ class clientclass:
     def create_room(self, room_name):
         self.room = True
         message = "  create  " + self.username + ' ' + room_name
-        message = str(len(message)) + message
-        self.socket.sendall(message.encode('utf-8'))
-
-    def add_user(self, message):
-        message = "  add  " + self.username + message
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
 
