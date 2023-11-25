@@ -9,9 +9,10 @@ class clientclass:
     def set_username_socket(self, username, socket):
         self.socket = socket
         self.username = username
-        username = "  set_username  " + self.username
-        username = str(len(self.username)) + self.username
-        self.socket.sendall(username.encode('utf-8')) 
+        message = "  set_username  " + username
+        message = str(len(message)) + message
+        socket.sendall(message.encode('utf-8')) 
+        socket.sendall("\n".encode('utf-8')) 
 
     def list_names(self):
         self.socket.sendall("7  names".encode('utf-8'))
