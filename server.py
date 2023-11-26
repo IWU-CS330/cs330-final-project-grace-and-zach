@@ -97,9 +97,47 @@ class ChatRoom(socketserver.StreamRequestHandler):
             elif data_list[1] == 'message':
                 self.wfile.write(data_list[2].encode('utf-8'))
 
+            elif data_list[1] == 'create':
+                chatroom = str(data_list[3])
+                db.execute('INSERT INTO chatrooms (chat_name) VALUES (?)', [chatroom])
+                db.commit()
+                self.wfile.write("You Have Created:"+ chatroom.encode("uft-8"))
+
+            #elif data_list[1] == 'add':
+
+
+            elif data_list[1] == 'join':
+                 chatroom = str(data_list[3])
+                 db.execute('UPDATE names SET chat_name = ? WHERE username = ?', [chatroom, str(data_list[2])])
+                 db.commit()
+                 self.wfile.write("You have Joined:" + chatroom.encode("uft-8"))
+            
+            elif data_list[1] == 'rooms':
+                cur = db.execute('SELECT chat_name from chatrooms')
+                list_message = ""
+                count = 0
+                for chatroom in cur.fetchall():
+                    chatroom = chatroom[0]
+                    print(chatroom)
+                    if len(cur.fetchall()) == 1 or count == len(cur.fetchall()):
+                        list_message = list_message + chatroom 
+                    else:
+                        list_message = chatroom + "," + list_message
+                    count = count + 1
+                self.wfile.write(list_message.encode('utf-8'))
+            
+            elif data_list[1] == 'leave':
+                chatroom = None
+                db.execute('UPDATE names SET chat_name = ? WHERE username = ?', [chatroom, str(data_list[2])])
+                db.commit()
+                self.wfile.write("You have Left the Chatroom \n and Returned to the Main Room" + chatroom.encode("uft-8"))
+
+
             elif data_list[1] == 'close':
                 print(f'Closed: {client}')
                 break
+
+        
 
 
 
