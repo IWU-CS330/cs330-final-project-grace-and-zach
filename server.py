@@ -3,6 +3,9 @@ import sqlite3
 import socketserver
 import threading
 
+import socketserver
+import threading
+
 
 
 
@@ -62,7 +65,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
             
             
 
-            if data == '\n':
+            if data '\n':
                 break
 
             
@@ -134,19 +137,6 @@ class ChatRoom(socketserver.StreamRequestHandler):
             elif data_list[1] == 'close':
                 print(f'Closed: {client}')
                 break
-
-        
-
-
-
-with ThreadedTCPServer(('', 59898), ChatRoom) as server:
-    print(f'The chatroom server is running...')
-    #NewUser = ChatRoom(socketserver.StreamRequestHandler)
-    #ChatRoom.start(NewUser)
-    server.serve_forever()
-                    
-
-
                 
 
 

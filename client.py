@@ -1,44 +1,33 @@
+#client
 import socket
 import client_class
-#client
+import threading
+
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 65432  # The port used by the server
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, 59898))
+def receive_messages(socket):
     while True:
-        user_name = input("What is your name\n")
-        if user_name != "":
+        data = socket.recv(1024)
+        if not data:
             break
-    s.sendall(client_class.set_username(user_name))
-    #s.sendall(b"\n")
-    
-    data = s.recv(1024) # when recieving must specify how many bytes to recieve
-    data = data.decode("utf-8")
-    print(data)
-    s.sendall(client_class.names())
-    data = s.recv(1024)
-    data = data.decode("utf-8")
-    print("Here is a list of usernames from our current users:", data)
-    print(client_class.help())
+        print(f"{data.decode('utf-8')}")
+
+def client_startup(socket):
+    while True:
+        username = input("What is your name\n")
+        if username != "":
+            break
+    client_class.set_username_socket(username, socket)
+    client_class.help()
     while True:
         user_input = input("enter a message\n")
-        if(user_input == "close"):
-            s.sendall(client_class.close_connection())
-            print("Connection Closed")
-            break
-        elif(user_input == "names"):
-            s.sendall(client_class.names())
-            data = s.recv(1024)
-            data = data.decode("utf-8")
-            print("Here is a list of usernames from our current users:", data)
-        elif(user_input == "help"):
-            print(client_class.help())
-        else:
-            s.sendall(client_class.message(user_input))
-            s.sendall(b"\n")
-            data = s.recv(1024) # when recieving must specify how many bytes to recieve
-            data = data.decode("utf-8")
+        split_input = user_input.split()
+        client_class.find_command(split_input[1], split_input[2])
 
-    s.close()
+if __name__ == "__main__":
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((HOST, PORT))
+        send_thread = threading.Thread(target=client_startup, args=(s,))
+        receive_thread = threading.Thread(target=receive_messages, args=(s,))
