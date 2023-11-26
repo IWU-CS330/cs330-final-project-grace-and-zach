@@ -62,7 +62,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
             
             
 
-            if data '\n':
+            if data == '\n':
                 break
 
             
