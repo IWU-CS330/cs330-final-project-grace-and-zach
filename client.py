@@ -21,12 +21,11 @@ def client_startup(socket):
     client.help()
     while True:
         user_input = input("enter a message\n")
-        split_input = user_input.split()
-        client.find_command(split_input[1], split_input[2])
+        client.find_command(user_input)
 
 if __name__ == "__main__":
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, 59898)) 
-        send_thread = threading.Thread(target=client_startup, args=(s,))
         receive_thread = threading.Thread(target=receive_messages, args=(s,))
+        send_thread = threading.Thread(target=client_startup, args=(s,))
         client_startup(s)
