@@ -1,6 +1,6 @@
 import socket
 
-class clientclass:
+class ClientClass:
     def __init__(self):
             self.username = None
             self.socket = None
