@@ -15,19 +15,22 @@ def receive_messages(socket):
         print(f"{data.decode('utf-8')}")
 
 def client_startup(socket):
+    print("panda")
+    client = client_class.clientclass()
     while True:
         username = input("What is your name\n")
         if username != "":
             break
-    client_class.set_username_socket(username, socket)
-    client_class.help()
+    client.set_username_socket(username, socket)
+    client.help()
     while True:
         user_input = input("enter a message\n")
         split_input = user_input.split()
-        client_class.find_command(split_input[1], split_input[2])
+        client.find_command(split_input[1], split_input[2])
 
 if __name__ == "__main__":
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((HOST, PORT))
+        s.connect((HOST, 59898)) 
         send_thread = threading.Thread(target=client_startup, args=(s,))
         receive_thread = threading.Thread(target=receive_messages, args=(s,))
+        client_startup(s)
