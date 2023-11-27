@@ -1,4 +1,3 @@
-from cryptography.fernet import Fernet
 
 class ClientClass:
     def __init__(self):
