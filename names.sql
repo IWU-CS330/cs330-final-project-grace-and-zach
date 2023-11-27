@@ -3,7 +3,7 @@ drop table if exists chatrooms;
 
 CREATE TABLE names (
     name_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT
+    username TEXT,
     chat_name TEXT
 );
 
