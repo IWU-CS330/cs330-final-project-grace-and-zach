@@ -8,7 +8,7 @@ class ClientClass:
     def set_username_socket(self, username, socket):
         self.socket = socket
         self.username = username
-        print(username)
+        #print(username)
         message = "  set_username  " + username
         message = str(len(message)) + message + '\n'
         socket.sendall(message.encode('utf-8'))
@@ -55,7 +55,7 @@ class ClientClass:
     def join_room(self, message):
         self.room = True
         message = "  join  " + self.username + ' ' + message
-        message = str(len(message)) + message
+        message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
         print("Joined room: " + message)
 
