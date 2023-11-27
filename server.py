@@ -38,7 +38,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
             # they were used to intialize,create, and read the database
 
             #we can tell if we got connected from here
-        client = f'{self.client_address} on {threading.currentThread().getName()}'
+        client = f'{self.client_address} on {threading.currentThread().name}'
         print(f'Connected: {client}')
       
 
@@ -50,7 +50,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
         # addr is client address
         #with conn:
             #print(f"Connected by {addr}")
-        
+        first = True
         while True:
             print("I'm in the True Statement")
             #data = conn.recv(1024)
@@ -65,7 +65,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
             
             
 
-            if data '\n':
+            if not data or data == '\n':
                 break
 
             
@@ -138,5 +138,10 @@ class ChatRoom(socketserver.StreamRequestHandler):
                 print(f'Closed: {client}')
                 break
                 
+with ThreadedTCPServer(('', 59898), ChatRoom) as server:
+    print(f'The chatroom server is running...')
+    #NewUser = ChatRoom(socketserver.StreamRequestHandler)
+    #ChatRoom.start(NewUser)
+    server.serve_forever()        
 
 
