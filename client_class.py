@@ -59,25 +59,25 @@ class ClientClass:
     def find_command(self, input, message):
         #Could add reset name method
         if input == 'names':
-            clientclass.list_names()
+            ClientClass.list_names()
         elif input == 'help':
-            clientclass.help()
+            ClientClass.help()
         elif input == 'create':
-            clientclass.create_room(message)
+            ClientClass.create_room(message)
         elif input == 'add':
-            clientclass.add_user(message)
+            ClientClass.add_user(message)
         elif input == 'join':
-            clientclass.join_room(message)
+            ClientClass.join_room(message)
         elif input == 'rooms':
-            clientclass.list_rooms()
+            ClientClass.list_rooms()
         elif input == 'close':
-            clientclass.close_connection()
+            ClientClass.close_connection()
         else:
             if self.room == True:
                 if input == 'leave':
-                    clientclass.leave_room(message)
+                    ClientClass.leave_room(message)
                 else:
-                    clientclass.message(input + message)
+                    ClientClass.message(input + message)
             else:
                 print("Sorry, we didn't understand that command")
 
