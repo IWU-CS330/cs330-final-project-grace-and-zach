@@ -1,6 +1,5 @@
-import socket
 
-class clientclass:
+class ClientClass:
     def __init__(self):
             self.username = None
             self.socket = None
@@ -9,6 +8,7 @@ class clientclass:
     def set_username_socket(self, username, socket):
         self.socket = socket
         self.username = username
+        print(username)
         message = "  set_username  " + username
         message = str(len(message)) + message + '\n'
         socket.sendall(message.encode('utf-8'))
@@ -37,36 +37,27 @@ class clientclass:
         message = "  message  " + self.username + ": " + message
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
-        data = socket.recv(1024) 
-        data = data.decode("utf-8")
-        print(data)
+        print(self.username + ": " + message)
 
     def create_room(self, room_name):
-        self.room = True
         message = "  create  " + self.username + ' ' + room_name
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
-        data = socket.recv(1024) 
-        data = data.decode("utf-8")
-        print(data)
+        print("created room: " + room_name)
 
     def leave_room(self):
         self.room = False
         message = "  leave  " + self.username
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
-        data = socket.recv(1024) 
-        data = data.decode("utf-8")
-        print(data)
+        print("Left Room")
 
     def join_room(self, message):
         self.room = True
         message = "  join  " + self.username + ' ' + message
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
-        data = socket.recv(1024) 
-        data = data.decode("utf-8")
-        print(data)
+        print("Joined room: " + message)
 
     def list_rooms(self):
         self.socket.sendall("7  rooms".encode('utf-8'))
@@ -80,23 +71,23 @@ class clientclass:
     def find_command(self, input, message):
         #Could add reset name method
         if input == 'names':
-            clientclass.list_names()
+            self.list_names()
         elif input == 'help':
-            clientclass.help()
+            self.help()
         elif input == 'create':
-            clientclass.create_room(self, message)
+            self.create_room(message)
         elif input == 'join':
-            clientclass.join_room(self, message)
+            self.join_room(message)
         elif input == 'rooms':
-            clientclass.list_rooms()
+            self.list_rooms()
         elif input == 'close':
-            clientclass.close_connection()
+            self.close_connection()
         else:
             if self.room == True:
                 if input == 'leave':
-                    clientclass.leave_room(message)
+                    self.leave_room(message)
                 else:
-                    clientclass.message(input + message)
+                    self.message(input + message)
             else:
                 print("Sorry, we didn't understand that command")
 

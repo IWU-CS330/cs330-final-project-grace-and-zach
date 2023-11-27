@@ -5,7 +5,7 @@ import threading
 
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
-PORT = 65432  # The port used by the server
+PORT = 59898  # The port used by the server
 
 def receive_messages(socket):
     while True:
@@ -15,12 +15,8 @@ def receive_messages(socket):
         print(f"{data.decode('utf-8')}")
 
 def client_startup(socket):
-    print("panda")
-    client = client_class.clientclass()
-    while True:
-        username = input("What is your name\n")
-        if username != "":
-            break
+    client = client_class.ClientClass()
+    username = input("What is your name\n")
     client.set_username_socket(username, socket)
     client.help()
     while True:

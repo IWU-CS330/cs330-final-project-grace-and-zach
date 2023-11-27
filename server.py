@@ -64,7 +64,6 @@ class ChatRoom(socketserver.StreamRequestHandler):
             print("Here is my data:", data)
             
             
-
             if not data or data == '\n':
                 break
 
