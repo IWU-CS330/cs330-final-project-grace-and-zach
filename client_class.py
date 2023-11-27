@@ -18,7 +18,7 @@ class ClientClass:
         
 
     def list_names(self):
-        self.socket.sendall("7  names".encode('utf-8'))
+        self.socket.sendall("7  names \n".encode('utf-8'))
         data = socket.recv(1024) 
         data = data.decode("utf-8")
         print(data) 
@@ -35,7 +35,7 @@ class ClientClass:
 
     def message(self, message):
         message = "  message  " + self.username + ": " + message
-        message = str(len(message)) + message
+        message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
         print(self.username + ": " + message)
 
@@ -48,7 +48,7 @@ class ClientClass:
     def leave_room(self):
         self.room = False
         message = "  leave  " + self.username
-        message = str(len(message)) + message
+        message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
         print("Left Room")
 
@@ -60,13 +60,13 @@ class ClientClass:
         print("Joined room: " + message)
 
     def list_rooms(self):
-        self.socket.sendall("7  rooms".encode('utf-8'))
+        self.socket.sendall("7  rooms \n".encode('utf-8'))
         data = socket.recv(1024) 
         data = data.decode("utf-8")
         print(data)
 
     def close_connection(self):
-        self.socket.sendall("7  close".encode('utf-8'))
+        self.socket.sendall("7  close \n".encode('utf-8'))
     
     def find_command(self, input, message):
         #Could add reset name method
