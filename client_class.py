@@ -1,4 +1,4 @@
-import socket
+from cryptography.fernet import Fernet
 
 class ClientClass:
     def __init__(self):
@@ -9,10 +9,10 @@ class ClientClass:
     def set_username_socket(self, username, socket):
         self.socket = socket
         self.username = username
+        print(username)
         message = "  set_username  " + username
-        message = str(len(message)) + message
+        message = str(len(message)) + message + "\n"
         socket.sendall(message.encode('utf-8')) 
-        socket.sendall("\n".encode('utf-8')) 
 
     def list_names(self):
         self.socket.sendall("7  names".encode('utf-8'))
@@ -31,24 +31,27 @@ class ClientClass:
         message = "  message  " + self.username + ": " + message
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
+        print(self.username + ": " + message)
 
     def create_room(self, room_name):
-        self.room = True
         message = "  create  " + self.username + ' ' + room_name
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
+        print("created room: " + room_name)
 
     def leave_room(self):
         self.room = False
         message = "  leave  " + self.username
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
+        print("Left Room")
 
     def join_room(self, message):
         self.room = True
         message = "  join  " + self.username + ' ' + message
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
+        print("Joined room: " + message)
 
     def list_rooms(self):
         self.socket.sendall("7  rooms".encode('utf-8'))
