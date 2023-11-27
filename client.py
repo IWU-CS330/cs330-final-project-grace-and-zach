@@ -28,4 +28,5 @@ if __name__ == "__main__":
         s.connect((HOST, 59898)) 
         receive_thread = threading.Thread(target=receive_messages, args=(s,))
         send_thread = threading.Thread(target=client_startup, args=(s,))
+        #receive_messages(s)
         client_startup(s)

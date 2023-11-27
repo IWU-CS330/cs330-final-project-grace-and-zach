@@ -1,3 +1,4 @@
+#from cryptography.fernet import Fernet
 
 class ClientClass:
     def __init__(self):
@@ -15,7 +16,6 @@ class ClientClass:
         data = socket.recv(1024) 
         data = data.decode("utf-8")
         print(data) 
-        
 
     def list_names(self):
         self.socket.sendall("7  names \n".encode('utf-8'))
@@ -40,7 +40,7 @@ class ClientClass:
         print(self.username + ": " + message)
 
     def create_room(self):
-        room_name = input("What would you like your room name to be?")
+        room_name = input("What would you like your room name to be?\n")
         message = "  create  " + self.username + ' ' + room_name
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
@@ -54,12 +54,12 @@ class ClientClass:
         print("Left Room")
 
     def join_room(self):
-        room_name = input("What room would you like to join")
+        room_name = input("What room would you like to join?\n")
         message = "  join  " + self.username + ' ' + room_name
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
         self.room = True
-        print("Joined room: " + message)
+        print("Joined room: " + room_name)
 
     def list_rooms(self):
         self.socket.sendall("7  rooms \n".encode('utf-8'))
