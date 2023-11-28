@@ -92,10 +92,13 @@ class ChatRoom(socketserver.StreamRequestHandler):
                     else:
                         list_message = username + "," + list_message
                     count = count + 1
+                list_message = "Here is a list of all current users:" + list_message
                 self.wfile.write(list_message.encode('utf-8'))
 
             elif data_list[1] == 'message':
-                self.wfile.write(data_list[2].encode('utf-8'))
+                #self.wfile.write(data_list[2].encode('utf-8'))
+                self.socket.sendall(data_list[2].encode('utf-8'))
+                #print("hi")
 
             elif data_list[1] == 'create':
                 chatroom = str(data_list[3])
@@ -121,13 +124,14 @@ class ChatRoom(socketserver.StreamRequestHandler):
                     else:
                         list_message = chatroom + "," + list_message
                     count = count + 1
+              
                 self.wfile.write(list_message.encode('utf-8'))
             
             elif data_list[1] == 'leave':
                 chatroom = "N/A"
                 db.execute('UPDATE names SET chat_name = ? WHERE username = ?', [chatroom, str(data_list[2])])
                 db.commit()
-                self.wfile.write("You have Left the Chatroom \n and Returned to the Main Room" + chatroom.encode("uft-8"))
+                
 
 
             elif data_list[1] == 'close':
