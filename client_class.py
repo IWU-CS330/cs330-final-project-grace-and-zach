@@ -69,6 +69,9 @@ class ClientClass:
 
     def close_connection(self):
         self.socket.sendall("7  close \n".encode('utf-8'))
+        data = self.socket.recv(1024) 
+        data = data.decode("utf-8")
+        print(data)
     
     def find_command(self, input):
         #Could add reset name method
