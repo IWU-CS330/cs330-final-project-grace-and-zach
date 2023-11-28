@@ -50,7 +50,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
         # addr is client address
         #with conn:
             #print(f"Connected by {addr}")
-        first = True
+        
         while True:
             print("I'm in the True Statement")
             #data = conn.recv(1024)
@@ -124,8 +124,10 @@ class ChatRoom(socketserver.StreamRequestHandler):
                     else:
                         list_message = chatroom + "," + list_message
                     count = count + 1
-              
-                self.wfile.write(list_message.encode('utf-8'))
+                
+                if count == 0:
+                    self.wfile.write(("There are no rooms yet \n Try Creating a room using the 'create' command").encode('utf-8'))
+                self.wfile.write(("Here is a list of all current chatrooms:" + list_message).encode('utf-8'))
             
             elif data_list[1] == 'leave':
                 chatroom = "N/A"
@@ -136,6 +138,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
 
             elif data_list[1] == 'close':
                 print(f'Closed: {client}')
+                self.wfile.write(("Your connection was closed \n WARNING any regular commands will now throw an error").encode('utf-8'))
                 break
                 
 with ThreadedTCPServer(('', 59898), ChatRoom) as server:
