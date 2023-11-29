@@ -1,5 +1,3 @@
-#from cryptography.fernet import Fernet
-
 class ClientClass:
     def __init__(self):
             self.username = None
@@ -9,7 +7,6 @@ class ClientClass:
     def set_username_socket(self, username, socket):
         self.socket = socket
         self.username = username
-        #print(username)
         message = "  set_username  " + username
         message = str(len(message)) + message + '\n'
         socket.sendall(message.encode('utf-8'))
@@ -33,11 +30,11 @@ class ClientClass:
         close: closes connection
         help: lists all commands""")
 
-    def message(self):
+    def message(self, message):
+        print(self.username + ": " + message)
         message = "  message  " + self.username + ": " + message
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
-        print(self.username + ": " + message)
 
     def create_room(self):
         room_name = input("What would you like your room name to be?\n")
