@@ -7,7 +7,7 @@ import socketserver
 import threading
 
 
-
+# make a global object to store all of the queues
 
 #Some of this code about socket programming comes from https://realpython.com/python-sockets/#echo-client-and-server
 
@@ -22,7 +22,11 @@ cur = db.cursor()
 cur.executescript(script)
 db.commit()
 
+Dict = {}
+
 class ChatRoom(socketserver.StreamRequestHandler):
+    
+
     print("Do we get to ChatRoom?")
     def handle(self):
         print("hi?")
@@ -52,6 +56,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
             #print(f"Connected by {addr}")
         
         while True:
+            
             print("I'm in the True Statement")
             #data = conn.recv(1024)
             #data = data.decode("utf-8")
@@ -70,13 +75,18 @@ class ChatRoom(socketserver.StreamRequestHandler):
             
             data_list = data.split()
             print(data_list)
-        
+            
+
+            
+
             if data_list[1] == 'set_username':
                 # put name in names table
                 name = str(data_list[2])
                 db.execute('INSERT INTO names (username, chat_name) VALUES (?,?)', [name, "N/A"])
                 db.commit()
+                Dict.update({name : self.wfile})
                 self.wfile.write(('Welcome '+ name).encode('utf-8'))
+                print(Dict)
             
             
             elif data_list[1] == 'names':   
@@ -96,8 +106,26 @@ class ChatRoom(socketserver.StreamRequestHandler):
                 self.wfile.write(list_message.encode('utf-8'))
 
             elif data_list[1] == 'message':
-                #self.wfile.write(data_list[2].encode('utf-8'))
-                self.socket.sendall(data_list[2].encode('utf-8'))
+                name = data_list[2]
+                print("Here is the user's name:", name)
+                select_room = db.execute('SELECT chat_name from names WHERE username = ?', [name])
+                print("Here is the room", name, "is in:", select_room.fetchall())
+                
+                for chatroom in select_room.fetchall():
+                    chatroom = chatroom[0]
+                
+                cur = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
+                print("Here is a list of all users in room:", chatroom, cur.fetchall())
+                
+                for user in cur.fetchall():
+                    user = user[0]
+                    print("cat")
+                    print("User:", user)
+
+
+                #cur = db.execute('SELECT username from names WHERE chat_name = ?', [select_room])
+                #self.wfile.write(data_list[3].encode('utf-8'))
+                #self.socket.sendall(data_list[2].encode('utf-8'))
                 #print("hi")
 
             elif data_list[1] == 'create':
