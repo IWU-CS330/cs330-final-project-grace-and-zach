@@ -33,8 +33,8 @@ class ClientClass:
 
 
     def message(self, message):
-        print(self.username + ": " + message)
-        message = "  message  " + self.username + ": " + message
+        #print(self.username + ": " + message)
+        message = "  message  " + self.username + " " + message
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
 
