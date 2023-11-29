@@ -102,6 +102,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
                     else:
                         list_message = username + "," + list_message
                     count = count + 1
+                
                 list_message = "Here is a list of all current users:" + list_message
                 self.wfile.write(list_message.encode('utf-8'))
 
@@ -129,14 +130,9 @@ class ChatRoom(socketserver.StreamRequestHandler):
                         if x >= 3:
                             user_message = user_message + " " + data_list[x]
                     
-                    user_socket.write(user_message.encode('utf-8'))
+                    user_socket.write((name + ":" + user_message).encode('utf-8'))
                     print("Sent message = ", user_message)
 
-
-                #cur = db.execute('SELECT username from names WHERE chat_name = ?', [select_room])
-                #self.wfile.write(data_list[3].encode('utf-8'))
-                #self.socket.sendall(data_list[2].encode('utf-8'))
-                #print("hi")
 
             elif data_list[1] == 'create':
                 chatroom = str(data_list[3])
