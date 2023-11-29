@@ -26,7 +26,10 @@ def client_startup(socket):
 if __name__ == "__main__":
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, 59898)) 
-        receive_thread = threading.Thread(target=receive_messages, args=(s,))
         send_thread = threading.Thread(target=client_startup, args=(s,))
-        #receive_messages(s)
-        client_startup(s)
+        receive_thread = threading.Thread(target=receive_messages, args=(s,))
+        send_thread.start()
+        receive_thread.start()
+        send_thread.join()
+        receive_thread.join()
+        #client_startup(s)
