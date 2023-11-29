@@ -114,13 +114,23 @@ class ChatRoom(socketserver.StreamRequestHandler):
                 for chatroom in select_room.fetchall():
                     chatroom = chatroom[0]
                 
-                cur = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
-                print("Here is a list of all users in room:", chatroom, cur.fetchall())
+                chatroom = str(chatroom)
+                print(str(chatroom))
                 
-                for user in cur.fetchall():
+                select_users = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
+        
+                for user in select_users.fetchall():
                     user = user[0]
-                    print("cat")
                     print("User:", user)
+                    user_socket = Dict[user]
+                    user_message = ""
+                    
+                    for x in range(len(data_list)):
+                        if x >= 3:
+                            user_message = user_message + " " + data_list[x]
+                    
+                    user_socket.write(user_message.encode('utf-8'))
+                    print("Sent message = ", user_message)
 
 
                 #cur = db.execute('SELECT username from names WHERE chat_name = ?', [select_room])

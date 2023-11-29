@@ -1,5 +1,7 @@
 #from cryptography.fernet import Fernet
 
+import queue
+
 class ClientClass:
     def __init__(self):
             self.username = None
@@ -13,15 +15,15 @@ class ClientClass:
         message = "  set_username  " + username
         message = str(len(message)) + message + '\n'
         socket.sendall(message.encode('utf-8'))
-        data = socket.recv(1024) 
-        data = data.decode("utf-8")
-        print(data) 
+        #data = socket.recv(1024) 
+        #data = data.decode("utf-8")
+        #print(data) 
 
     def list_names(self):
         self.socket.sendall("7  names \n".encode('utf-8'))
-        data = self.socket.recv(1024) 
-        data = data.decode("utf-8")
-        print(data) 
+        #data = self.socket.recv(1024) 
+        #data = data.decode("utf-8")
+        #print(data) 
 
     def help(self):
         print("""Current commands available:
@@ -33,11 +35,12 @@ class ClientClass:
         close: closes connection
         help: lists all commands""")
 
-    def message(self):
-        message = "  message  " + self.username + ": " + message
+    #get rid of message in parameters later
+    def message(self, message):
+        message = "  message  " + self.username + " " + message
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
-        print(self.username + ": " + message)
+        #print(self.username + ": " + message)
 
     def create_room(self):
         room_name = input("What would you like your room name to be?\n")
@@ -63,15 +66,15 @@ class ClientClass:
 
     def list_rooms(self):
         self.socket.sendall("7  rooms \n".encode('utf-8'))
-        data = self.socket.recv(1024) 
-        data = data.decode("utf-8")
-        print(data)
+        #data = self.socket.recv(1024) 
+        #data = data.decode("utf-8")
+        #print(data)
 
     def close_connection(self):
         self.socket.sendall("7  close \n".encode('utf-8'))
-        data = self.socket.recv(1024) 
-        data = data.decode("utf-8")
-        print(data)
+        #data = self.socket.recv(1024) 
+        #data = data.decode("utf-8")
+        #print(data)
     
     def find_command(self, input):
         #Could add reset name method
