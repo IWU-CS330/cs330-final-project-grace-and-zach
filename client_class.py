@@ -1,3 +1,8 @@
+import asyncio
+import os
+# from cryptography.hazmat.primitives import hashes
+# from cryptography.hazmat.primitives.asymmetric import rsa, padding
+# from cryptography.exceptions import InvalidSignature
 
 class ClientClass:
     def __init__(self):
@@ -8,12 +13,13 @@ class ClientClass:
     def set_username_socket(self, username, socket):
         self.socket = socket
         self.username = username
-        message = "  set_username  " + username
-        message = str(len(message)) + message + '\n'
+        message = "  set_username  " + username + '\n'
+        message = str(len(message)) + message 
         socket.sendall(message.encode('utf-8'))
-        #data = socket.recv(1024) 
-        #data = data.decode("utf-8")
-        #print(data) 
+        #self.set_key()
+
+    #def set_key(self):
+
 
     def list_names(self):
         self.socket.sendall("7  names \n".encode('utf-8'))
@@ -29,6 +35,7 @@ class ClientClass:
         create: creates a chatroom
         leave: leaves room you are in
         close: closes connection
+        file: sends a file
         help: lists all commands""")
 
 
@@ -73,6 +80,16 @@ class ClientClass:
         #data = data.decode("utf-8")
         #print(data)
     
+    def send_file(self):
+        file_path = input("What is the path to the file you'd like to send?\n")
+        file_name = input("What is the name of the file you'd like to send?\n")
+        with open(file_path, 'rb') as file:
+            file_data = file.read()
+        header = "  file  " + file_name
+        self.socket.sendall(len(file_data) + len(header))
+        self.socket.sendall(header)
+        self.socket.sendall(file_data)
+    
     def find_command(self, input):
         #Could add reset name method
         if input == 'names':
@@ -91,6 +108,8 @@ class ClientClass:
             if self.room == True:
                 if input == 'leave':
                     self.leave_room()
+                elif input == 'send':
+                    self.send_file()
                 else:
                     self.message(input)
             else:
