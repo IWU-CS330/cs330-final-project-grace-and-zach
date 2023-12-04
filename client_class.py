@@ -1,14 +1,16 @@
 import asyncio
 import os
-# from cryptography.hazmat.primitives import hashes
+# from cryptography.hazmat.backends import default_backend
+# from cryptography.hazmat.primitives import serialization, hashes
 # from cryptography.hazmat.primitives.asymmetric import rsa, padding
-# from cryptography.exceptions import InvalidSignature
 
 class ClientClass:
     def __init__(self):
             self.username = None
             self.socket = None
-            self.room = False       
+            self.room = False  
+            # self.private_key = None
+            # self.public_key = None
 
     def set_username_socket(self, username, socket):
         self.socket = socket
@@ -16,16 +18,20 @@ class ClientClass:
         message = "  set_username  " + username + '\n'
         message = str(len(message)) + message 
         socket.sendall(message.encode('utf-8'))
-        #self.set_key()
+        # self.set_key()
 
-    #def set_key(self):
-
+    # def set_key(self):
+    #     self.private_key = rsa.generate_private_key(
+    #         public_exponent=65537,
+    #         key_size=2048,
+    #         backend=default_backend()
+    #     )
+    #     self.public_key = self.private_key.public_key()
+    #     message =  " public_key " + self.public_key
+    #     self.socket.sendall(len(message) + message.encode('utf-8'))
 
     def list_names(self):
         self.socket.sendall("7  names \n".encode('utf-8'))
-        #data = self.socket.recv(1024) 
-        #data = data.decode("utf-8")
-        #print(data) 
 
     def help(self):
         print("""Current commands available:
@@ -40,7 +46,6 @@ class ClientClass:
 
 
     def message(self, message):
-        #print(self.username + ": " + message)
         message = "  message  " + self.username + " " + message
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
@@ -70,15 +75,9 @@ class ClientClass:
 
     def list_rooms(self):
         self.socket.sendall("7  rooms \n".encode('utf-8'))
-        #data = self.socket.recv(1024) 
-        #data = data.decode("utf-8")
-        #print(data)
 
     def close_connection(self):
         self.socket.sendall("7  close \n".encode('utf-8'))
-        #data = self.socket.recv(1024) 
-        #data = data.decode("utf-8")
-        #print(data)
     
     def send_file(self):
         file_path = input("What is the path to the file you'd like to send?\n")
