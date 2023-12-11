@@ -29,6 +29,7 @@ class ClientClass:
         create: creates a chatroom
         leave: leaves room you are in
         close: closes connection
+        file: sends a file
         help: lists all commands""")
 
 
@@ -72,6 +73,16 @@ class ClientClass:
         #data = self.socket.recv(1024) 
         #data = data.decode("utf-8")
         #print(data)
+
+    def send_file(self):
+        file_path = input("What is the path to the file you'd like to send?\n")
+        file_name = input("What is the name of the file you'd like to send?\n")
+        with open(file_path, 'rb') as file:
+            file_data = file.read()
+        header = "  file  " + file_name
+        self.socket.sendall((str(len(file_data) + len(header))).encode("utf-8"))
+        self.socket.sendall(header.encode("utf-8"))
+        self.socket.sendall(file_data)
     
     def find_command(self, input):
         #Could add reset name method
@@ -91,6 +102,8 @@ class ClientClass:
             if self.room == True:
                 if input == 'leave':
                     self.leave_room()
+                elif input == 'send':
+                    self.send_file()
                 else:
                     self.message(input)
             else:
