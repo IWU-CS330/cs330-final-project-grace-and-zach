@@ -92,6 +92,8 @@ def message(input):
                         if x >= 2:
                             user_message = user_message + " " + input[x]
                     
+                    length = len(name + ":" + user_message)
+                    Dict[user][0].write(str(length).encode('utf-8'))
                     Dict[user][0].write((name + ":" + user_message).encode('utf-8'))
                     print("Sent message = ", user_message)
 
@@ -190,16 +192,42 @@ class ChatRoom(socketserver.StreamRequestHandler):
             print("I'm in the True Statement")
             #data = s.recv(1024)
             # need to find someway to get the right number of bytes to read, which is in the message itself
+            digits = ["0","1","2","3","4","5","6","7","8","9"]
+            char = self.rfile.read(1)
+            char = char.decode("utf-8")
+            print("this is the first first digit:", char)
+            size = True
+            while size == True:
+                new_char = self.rfile.read(1)
+                print("Here is my new_char:", new_char)
+                new_char = new_char.decode("utf-8")
+                if new_char in digits:
+                    char = char + new_char
+                    print("The new string of digits is:", char)
+                else:
+                    size = False
+            
+            command_size = int(char) - 1
+            #self.wfile.write(str(command_size).encode("utf-8"))
+            print(command_size)
+            new_data = self.rfile.read(command_size)
+            
 
-            size = self.rfile.read(3)
-            while int(size + 1) == True:
-                size = int(self.rfile.read(1)) + size
-            size = int(size.decode("utf-8"))
-            print("This is the size of the file:", size)
-            data = self.rfile.read(size)
+            data = new_data.decode("utf-8")
+            data_list = data.split()
+            print("Here is the data_list at this time", data_list)
+
+            #data_list = data.split()
+            #while int(size + 1) == True:
+               # size = int(self.rfile.read(1)) + size
+
+            #size = int(size.decode("utf-8"))
+            #print("This is the size of the file:", size)
+            #data = self.rfile.read(size)
     
-            print("Here is my data undecoded", data)
-            data = data.decode("utf-8")
+            #print("Here is my data undecoded", data)
+            #data = data.decode("utf-8")
+            
             print("Here is my data:", data)
             
             
@@ -207,20 +235,26 @@ class ChatRoom(socketserver.StreamRequestHandler):
                 break
 
             
-            data_list = data.split()
+            #data_list = data.split()
             print(data_list)
 
             lock, name = set_username(data_list)
 
             if name != None:
                 Dict.update({name : [self.wfile, lock]})
+                message_length = len('Welcome '+ name)
+                message_length = str(message_length)
+                self.wfile.write(message_length.encode("utf-8"))
                 self.wfile.write(('Welcome '+ name).encode('utf-8'))
                 print(Dict)
             
             list_message = names(data_list)
 
             if list_message != None:
+                print("list_message = ", list_message)
+                self.wfile.write(str(len(list_message) + 1).encode('utf-8'))
                 self.wfile.write(list_message.encode('utf-8'))
+            
             
             #if data_list[1] == 'set_username':
             #    lock, name = set_username(data_list)
@@ -244,10 +278,12 @@ class ChatRoom(socketserver.StreamRequestHandler):
 
             list_message = rooms(data_list)
             if list_message != None:
+                self.wfile.write(str(len(list_message) + 1).encode('utf-8'))
                 self.wfile.write(list_message.encode('utf-8'))
 
             names_of_room = namesof(data_list)
             if names_of_room != None:
+                self.wfile.write(str(len(names_of_room)).encode('utf-8'))
                 self.wfile.write(names_of_room.encode('utf-8'))
 
             leave(data_list)
@@ -257,6 +293,39 @@ class ChatRoom(socketserver.StreamRequestHandler):
                 print(f'Closed: {client}')
                 self.wfile.write(("Your connection was closed \n WARNING any regular commands will now throw an error").encode('utf-8'))
                 break
+
+            if data_list[0] == 'file':
+                name = data_list[2]
+                print("Here is the user's name:", name)
+                select_room = db.execute('SELECT chat_name from names WHERE username = ?', [name])
+                #print("Here is the room", name, "is in:", select_room.fetchall())
+                
+                for chatroom in select_room.fetchall():
+                    chatroom = chatroom[0]
+                
+                chatroom = str(chatroom)
+                print(str(chatroom))
+                
+                select_users = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
+
+                for user in select_users.fetchall():
+                    user = user[0]
+                    print("User:", user)
+                    
+                    user_lock = Dict[user][1]
+                    
+                    with user_lock:
+                        user_message = ""
+                        
+                        for x in range(len(data_list)):
+                            if x >= 3:
+                                user_message = user_message + " " + data_list[x]
+                        
+                        print("This is the sent image:", user_message)
+                        Dict[user][0].write(str(len(data_list)).encode('utf-8'))
+                        Dict[user][0].write((name + ":").encode('utf-8'))
+                        Dict[user][0].write(user_message)
+                        print("Sent message = ", user_message)
 
                 
                         
