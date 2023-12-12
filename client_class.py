@@ -30,9 +30,6 @@ class ClientClass:
     #     message =  " public_key " + self.public_key
     #     self.socket.sendall(len(message) + message.encode('utf-8'))
 
-    def list_names(self):
-        self.socket.sendall("7  names \n".encode('utf-8'))
-
     def help(self):
         print("""Current commands available:
         names: returns list of all users
@@ -42,9 +39,20 @@ class ClientClass:
         leave: leaves room you are in
         close: closes connection
         file: sends a file
-        file: sends a file
+        members: lists members of room
         help: lists all commands""")
 
+    def list_names(self):
+        self.socket.sendall("7  names \n".encode('utf-8'))
+    
+    def list_members(self):
+        self.socket.sendall("7 namesof \n".encode('utf-8'))
+
+    def reset_name(self):
+        name = input("What would you like your new name to be?\n")
+        message = "  reset_name  " + name + "\n"
+        message = str(len(message)) + message
+        self.socket.sendall(message.encode('utf-8'))
 
     def message(self, message):
         message = "  message  " + self.username + " " + message
@@ -92,9 +100,10 @@ class ClientClass:
         self.socket.sendall(file_data)
     
     def find_command(self, input):
-        #Could add reset name method
         if input == 'names':
             self.list_names()
+        elif input == 'reset':
+            self.reset_name()
         elif input == 'help':
             self.help()
         elif input == 'create':
@@ -109,6 +118,8 @@ class ClientClass:
             if self.room == True:
                 if input == 'leave':
                     self.leave_room()
+                elif input == 'members':
+                    self.list_members()
                 elif input == 'send':
                     self.send_file()
                 else:
