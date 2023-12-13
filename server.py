@@ -29,6 +29,7 @@ cur.executescript(script)
 db.commit()
 
 Dict = {}
+Key_Dict = {}
 
 def set_username(input):
     if input[0] == 'set_username':
@@ -142,20 +143,20 @@ def rooms(input):
 
 def namesof(input):
     if input[0] == 'namesof':
-        chatroom = input[2] 
+        chatroom = input[1] 
         cur = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
         list_message = ""
         count = 0
-        for chatroom in cur.fetchall():
-            chatroom = chatroom[0]
-            print(chatroom)
+        for user in cur.fetchall():
+            user = user[0]
+            print(user)
             if len(cur.fetchall()) == 1 or count == len(cur.fetchall()):
-                list_message = list_message + chatroom 
+                list_message = list_message + user
             else:
-                list_message = chatroom + "," + list_message
+                list_message = user + "," + list_message
             count = count + 1
             
-        return "Here is a list of all current users of", chatroom + list_message
+        return "Here is a list of all current users of "+ chatroom + ":" + list_message
 
     return None
 
@@ -173,6 +174,29 @@ def close(input):
 def file(input):
     if input[0] == 'file':
         print("hi")
+
+def set_key(input):
+    if input[0] == 'set_public_key':
+        Key_Dict.update({input[1] : input[2]})
+
+def get_key(input):
+    if input[0] == 'get_public_keys':
+        chatroom = input[1] 
+        cur = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
+        list_keys = ""
+        count = 0
+        for user in cur.fetchall():
+            user = user[0]
+            if count == 0:
+                list_keys = "get_public_keys " + Key_Dict[user] +" " + list_keys
+            else:
+                list_keys = Key_Dict[user] + " " + list_keys
+            count = count + 1 
+
+        return list_keys
+    
+    else:
+        return None
 
 
 
@@ -236,10 +260,10 @@ class ChatRoom(socketserver.StreamRequestHandler):
                     
                     with user_lock:
                         user_message = []
-
-                       
-                        Dict[user][0].write(str(len("file " + data_list[1])).encode('utf-8'))
-                        Dict[user][0].write(("file " + data_list[1]).encode('utf-8'))
+                        print("The name of file:", data_list[1])
+ 
+                        Dict[user][0].write(str(len("file " + data_list[1].decode('utf-8'))).encode('utf-8'))
+                        Dict[user][0].write(("file " + data_list[1].decode('utf-8')).encode('utf-8'))
                         
                         #user_message = data_list[3:]
                         for x in range(len(data_list)):
@@ -255,7 +279,7 @@ class ChatRoom(socketserver.StreamRequestHandler):
                               #Dict[user][0].write("file " + data_list[x])
                              # print("This is the sent image:", data_list[x])
                           #elif x > 3:
-                            Dict[user][0].write(str(len(data_list[x])).encode("utf-8"))
+                            Dict[user][0].write((str(len(str(data_list[x])))).encode('utf-8'))
                             Dict[user][0].write(data_list[x])
                             #  print("This is the sent image:", data_list[x])
 
@@ -336,8 +360,13 @@ class ChatRoom(socketserver.StreamRequestHandler):
 
             names_of_room = namesof(data_list)
             if names_of_room != None:
-                self.wfile.write(str(len(names_of_room)).encode('utf-8'))
+                self.wfile.write(str(len(names_of_room) + 1).encode('utf-8'))
                 self.wfile.write(names_of_room.encode('utf-8'))
+
+            key_list = get_key(data_list)
+            if key_list != None:
+                self.wfile.write(str(len(key_list)).encode('utf-8'))
+                self.wfile.write(key_list.encode('utf-8'))
 
             leave(data_list)
                 
