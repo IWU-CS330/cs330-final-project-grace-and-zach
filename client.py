@@ -16,6 +16,11 @@ def receive_messages(socket, client):
             break
         split_data = data.split()
 
+        if split_data[0] == 'get_public_keys':
+            client.public_keys = []
+            for value in split_data[1:]:
+                client.public_keys.append(value)
+
         if split_data[0] == 'file':
             file_length = socket.recv(6)
             file_data = socket.recv(int(file_length))

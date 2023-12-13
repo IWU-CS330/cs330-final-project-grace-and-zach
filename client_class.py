@@ -7,6 +7,7 @@ class ClientClass:
             self.socket = None
             self.room = False  
             self.private_key = None
+            self.public_keys = []
 
     def set_username_socket(self, username, socket):
         self.socket = socket
@@ -69,13 +70,13 @@ class ClientClass:
         self.socket.sendall("7  close \n".encode('utf-8'))
 
     def message(self, input):
-        public_key_list = self.socket.sendall("16 get_public_keys".encode('utf-8'))
-        for key in public_key_list:
+        self.socket.sendall("16 get_public_keys".encode('utf-8'))
+        for key in self.public_keys:
             message = key.encrypt(
                 input,
                 padding.PKCS1v15()
             )
-            message = "message  " + self.username + " " + message
+            message = "  message  " + self.username + " " + message
             message = str(len(message)) + message + "\n"
             self.socket.sendall(message.encode('utf-8')) 
     
@@ -84,13 +85,13 @@ class ClientClass:
         file_name = input("What is the name of the file you'd like to send?\n")
         with open(file_path, 'rb') as file:
             file_data = file.read()
-        public_key_list = self.socket.sendall("16 get_public_keys".encode('utf-8'))
-        for key in public_key_list:
+        self.socket.sendall("16 get_public_keys".encode('utf-8'))
+        for key in self.public_keys:
             message = key.encrypt(
                 file_data,
                 padding.PKCS1v15()
             )
-            header = "file " + self.username + " " + file_name
+            header = " file " + self.username + " " + file_name
             self.socket.sendall(len(header) + header)
             self.socket.sendall(len(message) + message)
     
