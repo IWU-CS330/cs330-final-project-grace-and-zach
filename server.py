@@ -6,6 +6,7 @@ import threading
 import socketserver
 import threading
 import sys
+import os
 
 
 #Some of this code about socket programming comes from https://realpython.com/python-sockets/#echo-client-and-server
@@ -211,8 +212,73 @@ class ChatRoom(socketserver.StreamRequestHandler):
             #self.wfile.write(str(command_size).encode("utf-8"))
             print(command_size)
             new_data = self.rfile.read(command_size)
+            data_list = new_data.split()
             
+            if data_list[0].decode("utf-8") == 'file':
+                name = data_list[2].decode("utf-8")
+                print("Here is the user's name:", name)
+                select_room = db.execute('SELECT chat_name from names WHERE username = ?', [name])
+                #print("Here is the room", name, "is in:", select_room.fetchall())
+                
+                for chatroom in select_room.fetchall():
+                    chatroom = chatroom[0]
+                
+                chatroom = str(chatroom)
+                print(str(chatroom))
+                
+                select_users = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
 
+                for user in select_users.fetchall():
+                    user = user[0]
+                    print("User:", user)
+                    
+                    user_lock = Dict[user][1]
+                    
+                    with user_lock:
+                        user_message = []
+
+                       
+                        Dict[user][0].write(str(len("file " + data_list[1])).encode('utf-8'))
+                        Dict[user][0].write(("file " + data_list[1]).encode('utf-8'))
+                        
+                        #user_message = data_list[3:]
+                        for x in range(len(data_list)):
+                          if x >= 3:
+                              #with open("new_file.txt", "wb") as bin_file:
+                               #   bin_file.write(data_list[x])
+                              #print("DataList = ", data_list[x])
+                              #if '\x00' in data_list[x]:
+                               #user_message = user_message.append(" ")
+                              #else:
+                              # user_message = user_message.append(data_list[x])
+                              #Dict[user][0].write(str(len("file " + data_list[x])).encode("utf-8"))
+                              #Dict[user][0].write("file " + data_list[x])
+                             # print("This is the sent image:", data_list[x])
+                          #elif x > 3:
+                            Dict[user][0].write(str(len(data_list[x])).encode("utf-8"))
+                            Dict[user][0].write(data_list[x])
+                            #  print("This is the sent image:", data_list[x])
+
+                        #print("This is the sent image:", user_message)
+                        #bin_file.close()
+                        #file_size = os.stat("new_file.txt").st_size
+
+                        Dict[user][0].write(str(len(user_message)).encode('utf-8'))
+                        for x in range(len(user_message)):
+                            Dict[user][0].write(user_message[x])
+
+                        #Dict[user][0].write(str(len("file" + " " + data_list[1].decode('utf-8') + " ") + file_size).encode('utf-8'))
+                        #Dict[user][0].write(("file" + " " + data_list[1].decode('utf-8') + " " + bin_file).encode('utf-8'))
+
+                       
+
+                        #Dict[user][0].write(str(file_size).encode('utf-8'))
+                        #Dict[user][0].write(bin_file)
+                        #Dict[user][0].write(str(len(user_message)).encode('utf-8'))
+                        #Dict[user][0].write(user_message)
+                        #print("Sent message = ", user_message)
+
+                
             data = new_data.decode("utf-8")
             data_list = data.split()
             print("Here is the data_list at this time", data_list)
@@ -255,19 +321,6 @@ class ChatRoom(socketserver.StreamRequestHandler):
                 self.wfile.write(str(len(list_message) + 1).encode('utf-8'))
                 self.wfile.write(list_message.encode('utf-8'))
             
-            
-            #if data_list[1] == 'set_username':
-            #    lock, name = set_username(data_list)
-            #    Dict.update({name : [self.wfile, lock]})
-            #    self.wfile.write(('Welcome '+ name).encode('utf-8'))
-            #    print(Dict)
-
-            #elif data_list[1] == 'names':   
-                # print out a list of all of the names
-            #   list_message = names()
-            #   self.wfile.write(list_message.encode('utf-8'))
-
-            
             message(data_list)
                 
             create(data_list)
@@ -291,43 +344,11 @@ class ChatRoom(socketserver.StreamRequestHandler):
             door = close(data_list)
             if door == 'leave':
                 print(f'Closed: {client}')
+                self.wfile.write(str(len(("Your connection was closed \n WARNING any regular commands will now throw an error"))).encode("utf-8"))
                 self.wfile.write(("Your connection was closed \n WARNING any regular commands will now throw an error").encode('utf-8'))
                 break
 
-            if data_list[0] == 'file':
-                name = data_list[2]
-                print("Here is the user's name:", name)
-                select_room = db.execute('SELECT chat_name from names WHERE username = ?', [name])
-                #print("Here is the room", name, "is in:", select_room.fetchall())
-                
-                for chatroom in select_room.fetchall():
-                    chatroom = chatroom[0]
-                
-                chatroom = str(chatroom)
-                print(str(chatroom))
-                
-                select_users = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
-
-                for user in select_users.fetchall():
-                    user = user[0]
-                    print("User:", user)
-                    
-                    user_lock = Dict[user][1]
-                    
-                    with user_lock:
-                        user_message = ""
-                        
-                        for x in range(len(data_list)):
-                            if x >= 3:
-                                user_message = user_message + " " + data_list[x]
-                        
-                        print("This is the sent image:", user_message)
-                        Dict[user][0].write(str(len(data_list)).encode('utf-8'))
-                        Dict[user][0].write((name + ":").encode('utf-8'))
-                        Dict[user][0].write(user_message)
-                        print("Sent message = ", user_message)
-
-                
+            
                         
 with ThreadedTCPServer(('', 59898), ChatRoom) as server:
     print(f'The chatroom server is running...')
