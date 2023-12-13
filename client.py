@@ -10,6 +10,7 @@ PORT = 59898  # The port used by the server
 def receive_messages(socket, client):
     while True:
         data_length = socket.recv(6)
+        #print(type(int(data_length)))
         data = socket.recv(int(data_length))
         data = data.decode('utf-8')
         if not data:
