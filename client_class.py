@@ -1,16 +1,13 @@
-import asyncio
-import os
-# from cryptography.hazmat.backends import default_backend
-# from cryptography.hazmat.primitives import serialization, hashes
-# from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
 
 class ClientClass:
     def __init__(self):
             self.username = None
             self.socket = None
             self.room = False  
-            # self.private_key = None
-            # self.public_key = None
+            self.private_key = None
+            self.public_keys = []
 
     def set_username_socket(self, username, socket):
         self.socket = socket
@@ -18,17 +15,17 @@ class ClientClass:
         message = "  set_username  " + username + '\n'
         message = str(len(message)) + message 
         socket.sendall(message.encode('utf-8'))
-        # self.set_key()
+        self.set_key()
 
-    # def set_key(self):
-    #     self.private_key = rsa.generate_private_key(
-    #         public_exponent=65537,
-    #         key_size=2048,
-    #         backend=default_backend()
-    #     )
-    #     self.public_key = self.private_key.public_key()
-    #     message =  " public_key " + self.public_key
-    #     self.socket.sendall(len(message) + message.encode('utf-8'))
+    def set_key(self):
+        self.private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+            backend=default_backend()
+        )
+        message =  " set_public_key " + self.username + self.private_key.public_key()
+        message = str(len(message)) + message 
+        self.socket.sendall(message.encode('utf-8'))
 
     def help(self):
         print("""Current commands available:
@@ -54,17 +51,12 @@ class ClientClass:
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
 
-    def message(self, message):
-        message = "  message  " + self.username + " " + message
-        message = str(len(message)) + message + "\n"
-        self.socket.sendall(message.encode('utf-8'))
-
     def create_room(self):
         room_name = input("What would you like your room name to be?\n")
         message = "  create  " + self.username + ' ' + room_name
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
-        print("created room: " + room_name)
+        print("Created room: " + room_name)
 
     def leave_room(self):
         self.room = False
@@ -86,18 +78,40 @@ class ClientClass:
 
     def close_connection(self):
         self.socket.sendall("7  close \n".encode('utf-8'))
+    
+    def message(self, message):
+        self.socket.sendall("16 get_public_keys".encode('utf-8'))
+        for key in self.public_keys:
+            message = key.encrypt(
+                message,
+                padding.PKCS1v15()
+            )
+        message = "  message  " + self.username + " " + message
+        message = str(len(message)) + message + "\n"
+        self.socket.sendall(message.encode('utf-8'))
 
     def send_file(self):
         file_path = input("What is the path to the file you'd like to send?\n")
         file_name = input("What is the name of the file you'd like to send?\n")
         with open(file_path, 'rb') as file:
             file_data = file.read()
-
-        header = "  file  " + file_name
-        self.socket.sendall((str(len(file_data) + len(header))).encode("utf-8"))
-        self.socket.sendall(header.encode("utf-8"))
-        self.socket.sendall(file_data)
+        self.socket.sendall("16 get_public_keys".encode('utf-8'))
+        for key in self.public_keys:
+            message = key.encrypt(
+                file_data,
+                padding.PKCS1v15()
+            )
+            header = " file " + self.username + " " + file_name
+            self.socket.sendall(len(header) + header)
+            self.socket.sendall(len(message) + message)
     
+    def decrypt_message(self, input):
+        decrypted_message = self.private_key.decrypt(
+            input,
+            padding.PKCS1v15()
+        )
+        return decrypted_message
+
     def find_command(self, input):
         if input == 'names':
             self.list_names()
