@@ -5,9 +5,8 @@ import threading
 
 import socketserver
 import threading
+import sys
 
-
-# make a global object to store all of the queues
 
 #Some of this code about socket programming comes from https://realpython.com/python-sockets/#echo-client-and-server
 
@@ -15,8 +14,14 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
     allow_reuse_address = True
 
+# these next 6 lines of code came from   
+# https://stackoverflow.com/questions/54289555/how-do-i-execute-an-sqlite-script-from-within-python
+# they were used to intialize,create, and read the database
+
+
 with open('names.sql', 'r') as schema:
             script = schema.read()
+
 db = sqlite3.connect('names.db', check_same_thread=False)
 cur = db.cursor()
 cur.executescript(script)
@@ -24,46 +29,175 @@ db.commit()
 
 Dict = {}
 
-class ChatRoom(socketserver.StreamRequestHandler):
+def set_username(input):
+    if input[0] == 'set_username':
+        name = str(input[1])
+        db.execute('INSERT INTO names (username, chat_name) VALUES (?,?)', [name, "N/A"])
+        db.commit()
+
+        lock = threading.Lock()
+            #locked_thread = self.wfile.lock.acquire()
+        
+        return lock, name
+    else:
+        return None, None
     
+
+def names(input):
+    if input[0] == 'names':
+        cur = db.execute('SELECT username from names')
+        list_message = ""
+        count = 0
+        for username in cur.fetchall():
+            username = username[0]
+            print(username)            
+            if len(cur.fetchall()) == 1 or count == len(cur.fetchall()):
+                list_message = list_message + username 
+            else:
+                list_message = username + "," + list_message
+            count = count + 1
+                
+        list_message = "Here is a list of all current users:" + list_message
+        
+        return list_message  
+    
+    else:
+        return None
+
+def message(input):
+    if input[0] == 'message':         
+        name = input[1]
+        print("Here is the user's name:", name)
+        select_room = db.execute('SELECT chat_name from names WHERE username = ?', [name])
+        #print("Here is the room", name, "is in:", select_room.fetchall())
+        
+        for chatroom in select_room.fetchall():
+            chatroom = chatroom[0]
+        
+        chatroom = str(chatroom)
+        print(str(chatroom))
+        
+        select_users = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
+
+        for user in select_users.fetchall():
+            user = user[0]
+            print("User:", user)
+            
+            user_lock = Dict[user][1]
+            if user != name:
+                with user_lock:
+                    user_message = ""
+                    
+                    for x in range(len(input)):
+                        if x >= 2:
+                            user_message = user_message + " " + input[x]
+                    
+                    Dict[user][0].write((name + ":" + user_message).encode('utf-8'))
+                    print("Sent message = ", user_message)
+
+def create(input):
+    if input[0] == 'create':
+        chatroom = str(input[2])
+        db.execute('INSERT INTO chatrooms (chat_name) VALUES (?)', [chatroom])
+        db.commit()
+
+def join(input):
+    if input[0] == 'join':
+        chatroom = str(input[2])
+        cur = db.execute('SELECT chat_name from chatrooms WHERE chat_name = ?', [chatroom])
+        if cur.fetchall() != []:
+            db.execute('UPDATE names SET chat_name = ? WHERE username = ?', [chatroom, str(input[1])])
+            db.commit()
+            print("help pls")
+            return True
+        
+        else:
+            return False
+        
+    return None
+        
+
+def rooms(input):
+    if input[0] == 'rooms':
+        cur = db.execute('SELECT chat_name from chatrooms')
+        list_message = ""
+        count = 0
+        for chatroom in cur.fetchall():
+            chatroom = chatroom[0]
+            print(chatroom)
+            if len(cur.fetchall()) == 1 or count == len(cur.fetchall()):
+                list_message = list_message + chatroom 
+            else:
+                list_message = chatroom + "," + list_message
+            count = count + 1
+        
+        if count == 0:
+            return "There are no rooms yet \n Try Creating a room using the 'create' command"
+        
+        else:
+            return "Here is a list of all current chatrooms:" + list_message
+
+def namesof(input):
+    if input[0] == 'namesof':
+        chatroom = input[2] 
+        cur = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
+        list_message = ""
+        count = 0
+        for chatroom in cur.fetchall():
+            chatroom = chatroom[0]
+            print(chatroom)
+            if len(cur.fetchall()) == 1 or count == len(cur.fetchall()):
+                list_message = list_message + chatroom 
+            else:
+                list_message = chatroom + "," + list_message
+            count = count + 1
+            
+        return "Here is a list of all current users of", chatroom + list_message
+
+    return None
+
+def leave(input):
+    if input[0] == 'leave':
+        chatroom = "N/A"
+        db.execute('UPDATE names SET chat_name = ? WHERE username = ?', [chatroom, str(input[1])])
+        db.commit()
+
+def close(input):
+    if input[0] == 'close':
+        return 'leave'
+    return 'stay'
+
+def file(input):
+    if input[0] == 'file':
+        print("hi")
+
+
+
+class ChatRoom(socketserver.StreamRequestHandler):
 
     print("Do we get to ChatRoom?")
     def handle(self):
+
         print("hi?")
+            
         
-        #HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
-        #HOST  = "0.0.0.0" #Listen to all interfaces
-        #PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
-        # use port 59898 for testing
-
-        #with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:  
-            # these next 6 lines of code came from   
-            # https://stackoverflow.com/questions/54289555/how-do-i-execute-an-sqlite-script-from-within-python
-            # they were used to intialize,create, and read the database
-
-            #we can tell if we got connected from here
+        #we can tell if we got connected from here
         client = f'{self.client_address} on {threading.currentThread().name}'
         print(f'Connected: {client}')
-      
-
-        #s.bind((HOST, PORT))
-        #s.listen()
-        #while True:
-        #conn, addr = s.accept()
-        #conn is another socket object for new incoming connection
-        # addr is client address
-        #with conn:
-            #print(f"Connected by {addr}")
-        
+    
         while True:
-            
+
             print("I'm in the True Statement")
-            #data = conn.recv(1024)
-            #data = data.decode("utf-8")
-            
-            #print("Here is My Data:", self.rfile.readline())
-            data = self.rfile.readline()
-            #self.rfile.readline()
+            #data = s.recv(1024)
+            # need to find someway to get the right number of bytes to read, which is in the message itself
+
+            size = self.rfile.read(3)
+            while int(size + 1) == True:
+                size = int(self.rfile.read(1)) + size
+            size = int(size.decode("utf-8"))
+            print("This is the size of the file:", size)
+            data = self.rfile.read(size)
+    
             print("Here is my data undecoded", data)
             data = data.decode("utf-8")
             print("Here is my data:", data)
@@ -75,106 +209,57 @@ class ChatRoom(socketserver.StreamRequestHandler):
             
             data_list = data.split()
             print(data_list)
-            
 
-            
+            lock, name = set_username(data_list)
 
-            if data_list[1] == 'set_username':
-                # put name in names table
-                name = str(data_list[2])
-                db.execute('INSERT INTO names (username, chat_name) VALUES (?,?)', [name, "N/A"])
-                db.commit()
-                Dict.update({name : self.wfile})
+            if name != None:
+                Dict.update({name : [self.wfile, lock]})
                 self.wfile.write(('Welcome '+ name).encode('utf-8'))
                 print(Dict)
             
+            list_message = names(data_list)
+
+            if list_message != None:
+                self.wfile.write(list_message.encode('utf-8'))
             
-            elif data_list[1] == 'names':   
+            #if data_list[1] == 'set_username':
+            #    lock, name = set_username(data_list)
+            #    Dict.update({name : [self.wfile, lock]})
+            #    self.wfile.write(('Welcome '+ name).encode('utf-8'))
+            #    print(Dict)
+
+            #elif data_list[1] == 'names':   
                 # print out a list of all of the names
-                cur = db.execute('SELECT username from names')
-                list_message = ""
-                count = 0
-                for username in cur.fetchall():
-                    username = username[0]
-                    print(username)
-                    if len(cur.fetchall()) == 1 or count == len(cur.fetchall()):
-                        list_message = list_message + username 
-                    else:
-                        list_message = username + "," + list_message
-                    count = count + 1
+            #   list_message = names()
+            #   self.wfile.write(list_message.encode('utf-8'))
+
+            
+            message(data_list)
                 
-                list_message = "Here is a list of all current users:" + list_message
+            create(data_list)
+
+            available = join(data_list)
+            if available == False:
+                self.wfile.write("Sorry this room doesn't exist".encode('utf-8'))
+
+            list_message = rooms(data_list)
+            if list_message != None:
                 self.wfile.write(list_message.encode('utf-8'))
 
-            elif data_list[1] == 'message':
-                name = data_list[2]
-                print("Here is the user's name:", name)
-                select_room = db.execute('SELECT chat_name from names WHERE username = ?', [name])
-                print("Here is the room", name, "is in:", select_room.fetchall())
+            names_of_room = namesof(data_list)
+            if names_of_room != None:
+                self.wfile.write(names_of_room.encode('utf-8'))
+
+            leave(data_list)
                 
-                for chatroom in select_room.fetchall():
-                    chatroom = chatroom[0]
-                
-                chatroom = str(chatroom)
-                print(str(chatroom))
-                
-                select_users = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
-        
-                for user in select_users.fetchall():
-                    user = user[0]
-                    print("User:", user)
-                    user_socket = Dict[user]
-                    user_message = ""
-                    
-                    for x in range(len(data_list)):
-                        if x >= 3:
-                            user_message = user_message + " " + data_list[x]
-                    
-                    user_socket.write((name + ":" + user_message).encode('utf-8'))
-                    print("Sent message = ", user_message)
-
-
-            elif data_list[1] == 'create':
-                chatroom = str(data_list[3])
-                db.execute('INSERT INTO chatrooms (chat_name) VALUES (?)', [chatroom])
-                db.commit()
-
-
-            elif data_list[1] == 'join':
-                 chatroom = str(data_list[3])
-                 db.execute('UPDATE names SET chat_name = ? WHERE username = ?', [chatroom, str(data_list[2])])
-                 db.commit()
-                 
-            
-            elif data_list[1] == 'rooms':
-                cur = db.execute('SELECT chat_name from chatrooms')
-                list_message = ""
-                count = 0
-                for chatroom in cur.fetchall():
-                    chatroom = chatroom[0]
-                    print(chatroom)
-                    if len(cur.fetchall()) == 1 or count == len(cur.fetchall()):
-                        list_message = list_message + chatroom 
-                    else:
-                        list_message = chatroom + "," + list_message
-                    count = count + 1
-                
-                if count == 0:
-                    self.wfile.write(("There are no rooms yet \n Try Creating a room using the 'create' command").encode('utf-8'))
-                self.wfile.write(("Here is a list of all current chatrooms:" + list_message).encode('utf-8'))
-            
-            elif data_list[1] == 'leave':
-                chatroom = "N/A"
-                db.execute('UPDATE names SET chat_name = ? WHERE username = ?', [chatroom, str(data_list[2])])
-                db.commit()
-                
-
-
-            elif data_list[1] == 'close':
+            door = close(data_list)
+            if door == 'leave':
                 print(f'Closed: {client}')
                 self.wfile.write(("Your connection was closed \n WARNING any regular commands will now throw an error").encode('utf-8'))
                 break
+
                 
+                        
 with ThreadedTCPServer(('', 59898), ChatRoom) as server:
     print(f'The chatroom server is running...')
     #NewUser = ChatRoom(socketserver.StreamRequestHandler)

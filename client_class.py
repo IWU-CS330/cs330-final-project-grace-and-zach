@@ -27,9 +27,6 @@ class ClientClass:
         message = str(len(message)) + message 
         self.socket.sendall(message.encode('utf-8'))
 
-    def list_names(self):
-        self.socket.sendall("7  names \n".encode('utf-8'))
-
     def help(self):
         print("""Current commands available:
         names: returns list of all users
@@ -39,7 +36,20 @@ class ClientClass:
         leave: leaves room you are in
         close: closes connection
         file: sends a file
-        help: lists all commands""") 
+        members: lists members of room
+        help: lists all commands""")
+
+    def list_names(self):
+        self.socket.sendall("7  names \n".encode('utf-8'))
+    
+    def list_members(self):
+        self.socket.sendall("7 namesof \n".encode('utf-8'))
+
+    def reset_name(self):
+        name = input("What would you like your new name to be?\n")
+        message = "  reset_name  " + name + "\n"
+        message = str(len(message)) + message
+        self.socket.sendall(message.encode('utf-8'))
 
     def create_room(self):
         room_name = input("What would you like your room name to be?\n")
@@ -68,18 +78,18 @@ class ClientClass:
 
     def close_connection(self):
         self.socket.sendall("7  close \n".encode('utf-8'))
-
-    def message(self, input):
+    
+    def message(self, message):
         self.socket.sendall("16 get_public_keys".encode('utf-8'))
         for key in self.public_keys:
             message = key.encrypt(
-                input,
+                message,
                 padding.PKCS1v15()
             )
-            message = "  message  " + self.username + " " + message
-            message = str(len(message)) + message + "\n"
-            self.socket.sendall(message.encode('utf-8')) 
-    
+        message = "  message  " + self.username + " " + message
+        message = str(len(message)) + message + "\n"
+        self.socket.sendall(message.encode('utf-8'))
+
     def send_file(self):
         file_path = input("What is the path to the file you'd like to send?\n")
         file_name = input("What is the name of the file you'd like to send?\n")
@@ -103,9 +113,10 @@ class ClientClass:
         return decrypted_message
 
     def find_command(self, input):
-        #Could add reset name method
         if input == 'names':
             self.list_names()
+        elif input == 'reset':
+            self.reset_name()
         elif input == 'help':
             self.help()
         elif input == 'create':
@@ -120,11 +131,11 @@ class ClientClass:
             if self.room == True:
                 if input == 'leave':
                     self.leave_room()
+                elif input == 'members':
+                    self.list_members()
                 elif input == 'send':
                     self.send_file()
                 else:
                     self.message(input)
             else:
                 print("Sorry, we didn't understand that command")
-
-    

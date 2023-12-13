@@ -44,7 +44,7 @@ def client_startup(socket, client):
     client.set_username_socket(username, socket)
     client.help()
     while True:
-        user_input = input("enter a message\n")
+        user_input = input("\n")
         client.find_command(user_input)
 
 if __name__ == "__main__":
