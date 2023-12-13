@@ -59,7 +59,6 @@ class ClientClass:
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
 
-
     def create_room(self):
         room_name = input("What would you like your room name to be?\n")
         message = "  create  " + self.username + ' ' + room_name
@@ -126,5 +125,3 @@ class ClientClass:
                     self.message(input)
             else:
                 print("Sorry, we didn't understand that command")
-
-    
