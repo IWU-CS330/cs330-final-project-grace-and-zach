@@ -7,42 +7,30 @@ import threading
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 59898  # The port used by the server
 
-def receive_messages(socket, client):
+def receive_messages(socket):
     while True:
-        data_length = socket.recv(4)
-        if not data_length:
-            break
-        #print(type(int(data_length)))
-        data = socket.recv(int(data_length))
+        data_length = socket.recv(6)
+        #print("here is the data length:", data_length)
+        data = socket.recv(int(data_length.decode("utf-8")))
         data = data.decode('utf-8')
         if not data:
             break
         split_data = data.split()
-
-        if split_data[0] == 'get_public_keys':
-            client.public_keys = []
-            for value in split_data[1:]:
-                client.public_keys.append(value)
-
+      
         if split_data[0] == 'file':
-            file_length = socket.recv(6)
-            file_data = socket.recv(int(file_length))
-            file_data = file_data.decode('utf-8')
-            file_data = client.decrypt_message(file_data)
-
-            with open(split_data[2], 'wb') as received_file:
-                received_file.write(file_data)
-            print(split_data[1], " Sent file: ", split_data[2])
-
-        elif split_data[0] == 'message':
-            decrypted_message = client.decrypt_message(split_data[2])
-            print(split_data[1], ": ", decrypted_message)
-
+            with open(split_data[1], 'wb') as received_file:
+                #This may not work with file data
+               data_length = socket.recv(20)
+             #print("here is the data length:", data_length)
+               data = socket.recv(int(data_length.decode("utf-8")))
+               for x in data:
+                    received_file.write(x)
         else:
             print(data)
+        
 
-def client_startup(socket, client):
-    
+def client_startup(socket):
+    client = client_class.ClientClass()
     username = input("What is your name\n")
     client.set_username_socket(username, socket)
     client.help()
@@ -53,9 +41,8 @@ def client_startup(socket, client):
 if __name__ == "__main__":
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, 59898)) 
-        client = client_class.ClientClass()
-        send_thread = threading.Thread(target=client_startup, args=(s,client,))
-        receive_thread = threading.Thread(target=receive_messages, args=(s,client,))
+        send_thread = threading.Thread(target=client_startup, args=(s,))
+        receive_thread = threading.Thread(target=receive_messages, args=(s,))
         send_thread.start()
         receive_thread.start()
         send_thread.join()
