@@ -30,17 +30,18 @@ class ClientClass:
     def help(self):
         print("""Current commands available:
         names: returns list of all users
+        reset: resets username
+        create: creates a chatroom
         rooms: lists rooms
         join: joins chatroom
-        create: creates a chatroom
+        members: lists members of room
+        file: sends a file
         leave: leaves room you are in
         close: closes connection
-        file: sends a file
-        members: lists members of room
         help: lists all commands""")
 
     def list_names(self):
-        self.socket.sendall("7  names \n".encode('utf-8'))
+        self.socket.sendall("7 names \n".encode('utf-8'))
     
     def list_members(self):
         self.socket.sendall("7 namesof \n".encode('utf-8'))
