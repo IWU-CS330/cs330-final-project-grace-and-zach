@@ -22,7 +22,7 @@ class ClientClass:
             key_size=2048,
             backend=default_backend()
         )
-        message =  " set_public_key " + self.private_key.public_key()
+        message =  " set_public_key " + self.username + self.private_key.public_key()
         message = str(len(message)) + message 
         self.socket.sendall(message.encode('utf-8'))
 
