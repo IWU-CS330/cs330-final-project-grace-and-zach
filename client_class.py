@@ -10,6 +10,8 @@ class ClientClass:
             self.public_keys = []
 
     def set_username_socket(self, username, socket):
+        # Sets up the states of the class to include the socket, and username
+        # Also calls set key to continue setup
         self.socket = socket
         self.username = username
         message = "  set_username  " + username + "\n"
@@ -18,6 +20,7 @@ class ClientClass:
         self.set_key()
 
     def set_key(self):
+        # Sets private key, and sends public key to the server
         self.private_key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=2048,
@@ -26,6 +29,14 @@ class ClientClass:
         message =  " set_public_key " + self.username + str(self.private_key.public_key())
         message = str(len(message)) + message 
         self.socket.sendall(message.encode('utf-8'))
+
+    def decrypt_message(self, input):
+        # Decrypts message
+        decrypted_message = self.private_key.decrypt(
+            input,
+            padding.PKCS1v15()
+        )
+        return decrypted_message
 
     def help(self):
         print("""Current commands available:
@@ -49,30 +60,28 @@ class ClientClass:
         self.socket.sendall("7 namesof".encode('utf-8'))
 
     def reset_name(self):
+        # Resets name on client and server
         name = input("What would you like your new name to be?\n")
+        self.username = name
         message = "  reset_name  " + name + "\n"
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
 
     def create_room(self):
+        # Tells server to create room with the name of the input
         room_name = input("What would you like your room name to be?\n")
         message = "  create  " + self.username + ' ' + room_name
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
         print("Created room: " + room_name)
 
-    def leave_room(self):
-        self.room = False
-        message = "  leave  " + self.username
-        message = str(len(message)) + message + "\n"
-        self.socket.sendall(message.encode('utf-8'))
-        print("Left Room")
-
     def join_room(self):
+        # Joins room of the given input, and also gets the public keys
         room_name = input("What room would you like to join?\n")
         message = "  join  " + self.username + ' ' + room_name
         message = str(len(message)) + message + "\n"
         self.socket.sendall(message.encode('utf-8'))
+        self.socket.sendall("16 get_public_keys".encode('utf-8'))
         self.room = True
         print("Joined room: " + room_name)
 
@@ -85,20 +94,22 @@ class ClientClass:
     def message(self, message):
         self.socket.sendall(("50 get_public_keys " + self.username).encode('utf-8'))
         for key in self.public_keys:
-            message = key.encrypt(
-                message,
+            encrypted_message = key.encrypt(
+                input,
                 padding.PKCS1v15()
             )
-        message = "  message  " + self.username + " " + message
-        message = str(len(message)) + message + "\n"
-        self.socket.sendall(message.encode('utf-8'))
+            message = "  message  " + self.username + ": " + encrypted_message
+            message = str(len(message)) + message + "\n"
+            self.socket.sendall(message.encode('utf-8'))
 
     def send_file(self):
+        # Finds the path and name of the file, then encrypts with available public keys
+        # Then sends the unique encrypted file to its intended recievers 1 by 1
+        self.socket.sendall("16 get_public_keys".encode('utf-8'))
         file_path = input("What is the path to the file you'd like to send?\n")
         file_name = input("What is the name of the file you'd like to send?\n")
         with open(file_path, 'rb') as file:
             file_data = file.read()
-        self.socket.sendall("16 get_public_keys".encode('utf-8'))
         for key in self.public_keys:
             message = key.encrypt(
                 file_data,
@@ -108,14 +119,18 @@ class ClientClass:
             self.socket.sendall(len(header) + header)
             self.socket.sendall(len(message) + message)
     
-    def decrypt_message(self, input):
-        decrypted_message = self.private_key.decrypt(
-            input,
-            padding.PKCS1v15()
-        )
-        return decrypted_message
+    def leave_room(self):
+        # Leaves room, adjusts state accordingly
+        message = "  leave  " + self.username
+        message = str(len(message)) + message + "\n"
+        self.socket.sendall(message.encode('utf-8'))
+        self.room = False
+        self.public_keys = []
+        print("Left Room")
+
 
     def find_command(self, input):
+        # Handles input from the user to call the correct function
         if input == 'names':
             self.list_names()
         elif input == 'reset':
