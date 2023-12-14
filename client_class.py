@@ -105,7 +105,7 @@ class ClientClass:
     def send_file(self):
         # Finds the path and name of the file, then encrypts with available public keys
         # Then sends the unique encrypted file to its intended recievers 1 by 1
-        self.socket.sendall("16 get_public_keys".encode('utf-8'))
+        #self.socket.sendall("16 get_public_keys".encode('utf-8'))
         file_path = input("What is the path to the file you'd like to send?\n")
         file_name = input("What is the name of the file you'd like to send?\n")
         with open(file_path, 'rb') as file:

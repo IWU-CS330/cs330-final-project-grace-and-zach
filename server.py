@@ -292,14 +292,15 @@ class ChatRoom(socketserver.StreamRequestHandler):
                         user_message = []
                         print("The name of file:", data_list[1])
 
-                        # sends the length of file + the name of the file 
-                        Dict[user][0].write(str(len("file " + data_list[1].decode('utf-8'))).encode('utf-8'))
-                        Dict[user][0].write(("file " + data_list[1].decode('utf-8')).encode('utf-8'))
+                        # sends the length of file + the name of the file + a list of all of the bits of the file
+                        Dict[user][0].write(str(len("file " + data_list[1].decode('utf-8') + " " + data_list[3:])).encode('utf-8'))
+                        Dict[user][0].write(("file " + data_list[1].decode('utf-8') + " " + data_list[3:]).encode('utf-8'))
                         
                    
                         # for every bit in the message 
                         for x in range(len(data_list)):
                           if x >= 3:
+                              print("cat")
                               #with open("new_file.txt", "wb") as bin_file:
                                #   bin_file.write(data_list[x])
                               #print("DataList = ", data_list[x])
@@ -313,9 +314,9 @@ class ChatRoom(socketserver.StreamRequestHandler):
                           #elif x > 3:
 
                             # send the length of the single bit
-                            Dict[user][0].write((str(len(str(data_list[x])))).encode('utf-8'))
+                            #Dict[user][0].write((str(len(str(data_list[x])))).encode('utf-8'))
                             # send the bit itself to the client
-                            Dict[user][0].write(data_list[x])
+                            #Dict[user][0].write(data_list[x])
 
                             #  print("This is the sent image:", data_list[x])
 
