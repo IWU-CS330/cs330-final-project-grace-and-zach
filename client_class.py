@@ -38,6 +38,16 @@ class ClientClass:
         length = len("namesof " + room_name)
         self.socket.sendall((str(length + 1) + " namesof " + room_name).encode('utf-8'))
 
+    def reset_name(self):
+        # Resets name on client and server
+        name = input("What would you like your new name to be?\n")
+        old_name = self.username
+        self.username = name
+        message = "  reset_name  " + old_name + " " + name 
+        message = str(len(message)) + message
+        self.socket.sendall(message.encode('utf-8'))
+
+
     def help(self):
         print("""Current commands available:
         names: returns list of all users
@@ -95,11 +105,15 @@ class ClientClass:
         self.socket.sendall((str(len(file_data) + len(header))).encode("utf-8"))
         self.socket.sendall(header.encode("utf-8"))
         self.socket.sendall(file_data)
+
+    
     
     def find_command(self, input):
         #Could add reset name method
         if input == 'names':
             self.list_names()
+        elif input == 'reset':
+            self.reset_name()
         elif input == 'help':
             self.help()
         elif input == 'create':
