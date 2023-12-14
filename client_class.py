@@ -51,12 +51,13 @@ class ClientClass:
     def help(self):
         print("""Current commands available:
         names: returns list of all users
+        reset: reset your username 
         rooms: lists rooms
         join: joins chatroom
         create: creates a chatroom
         leave: leaves room you are in
         close: closes connection
-        send: sends a file
+        send: sends a file (NOT WORKING)
         members: lists members of room
         help: lists all commands""")
 
