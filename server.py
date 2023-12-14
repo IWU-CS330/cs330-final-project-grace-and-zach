@@ -181,7 +181,11 @@ def set_key(input):
 
 def get_key(input):
     if input[0] == 'get_public_keys':
-        chatroom = input[1] 
+        user_name = input[1]
+        cur = db.execute('SELECT chat_name from names WHERE username = ?', [user_name])
+        for room in cur.fetchall():
+            chatroom = room[0]
+            
         cur = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
         list_keys = ""
         count = 0
