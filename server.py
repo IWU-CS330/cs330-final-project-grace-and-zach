@@ -10,6 +10,7 @@ import os
 
 
 #Some of this code about socket programming comes from https://realpython.com/python-sockets/#echo-client-and-server
+#Some of this code about making a multithreaded server comes from https://cs.lmu.edu/~ray/notes/pythonnetexamples/ 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
@@ -41,6 +42,23 @@ def set_username(input):
             #locked_thread = self.wfile.lock.acquire()
         
         return lock, name
+    else:
+        return None, None
+    
+def reset_name(input):
+    if input[0] == 'reset_name':
+        print("do I make it to the reset command")
+        old_name = input[1]
+        name = input[2]
+        cur = db.execute('SELECT name_id from names WHERE username = ?', [old_name])
+        
+        for id in cur.fetchall():
+            id = id[0]
+
+        db.execute('UPDATE names SET username = ? WHERE name_id = ?', [name , id])
+        db.commit()
+
+        return name, old_name
     else:
         return None, None
     
@@ -181,7 +199,11 @@ def set_key(input):
 
 def get_key(input):
     if input[0] == 'get_public_keys':
-        chatroom = input[1] 
+        user_name = input[1]
+        cur = db.execute('SELECT chat_name from names WHERE username = ?', [user_name])
+        for room in cur.fetchall():
+            chatroom = room[0]
+
         cur = db.execute('SELECT username from names WHERE chat_name = ?', [chatroom])
         list_keys = ""
         count = 0
@@ -340,6 +362,15 @@ class ChatRoom(socketserver.StreamRequestHandler):
             
             list_message = names(data_list)
 
+            new_name, old_name = reset_name(data_list)
+            if new_name != None:
+                Dict[new_name] = Dict[old_name]
+                message_length = len('Welcome '+ new_name)
+                message_length = str(message_length)
+                self.wfile.write(message_length.encode("utf-8"))
+                self.wfile.write(('Welcome '+ new_name).encode('utf-8'))
+                print(Dict)
+
             if list_message != None:
                 print("list_message = ", list_message)
                 self.wfile.write(str(len(list_message) + 1).encode('utf-8'))
@@ -373,8 +404,8 @@ class ChatRoom(socketserver.StreamRequestHandler):
             door = close(data_list)
             if door == 'leave':
                 print(f'Closed: {client}')
-                self.wfile.write(str(len(("Your connection was closed \n WARNING any regular commands will now throw an error"))).encode("utf-8"))
-                self.wfile.write(("Your connection was closed \n WARNING any regular commands will now throw an error").encode('utf-8'))
+                self.wfile.write(str(len(("Your connection was closed. WARNING any regular commands will now throw an error \n"))).encode("utf-8"))
+                self.wfile.write(("Your connection was closed. WARNING any regular commands will now throw an error \n").encode('utf-8'))
                 break
 
             
