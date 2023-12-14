@@ -15,7 +15,7 @@ class ClientClass:
     def set_username_socket(self, username, socket):
         self.socket = socket
         self.username = username
-        message = "  set_username  " + username + '\n'
+        message = "  set_username  " + username + "\n"
         message = str(len(message)) + message 
         socket.sendall(message.encode('utf-8'))
         # self.set_key()
@@ -31,7 +31,12 @@ class ClientClass:
     #     self.socket.sendall(len(message) + message.encode('utf-8'))
 
     def list_names(self):
-        self.socket.sendall("7  names \n".encode('utf-8'))
+        self.socket.sendall("7  names".encode('utf-8'))
+
+    def list_members(self):
+        room_name = input("What room would you like to check the members of?")
+        length = len("namesof " + room_name)
+        self.socket.sendall((str(length + 1) + " namesof " + room_name).encode('utf-8'))
 
     def help(self):
         print("""Current commands available:
@@ -41,8 +46,8 @@ class ClientClass:
         create: creates a chatroom
         leave: leaves room you are in
         close: closes connection
-        file: sends a file
-        file: sends a file
+        send: sends a file
+        members: lists members of room
         help: lists all commands""")
 
 
@@ -75,10 +80,10 @@ class ClientClass:
         print("Joined room: " + room_name)
 
     def list_rooms(self):
-        self.socket.sendall("7  rooms \n".encode('utf-8'))
+        self.socket.sendall("7  rooms".encode('utf-8'))
 
     def close_connection(self):
-        self.socket.sendall("7  close \n".encode('utf-8'))
+        self.socket.sendall("7  close".encode('utf-8'))
 
     def send_file(self):
         file_path = input("What is the path to the file you'd like to send?\n")
@@ -86,7 +91,7 @@ class ClientClass:
         with open(file_path, 'rb') as file:
             file_data = file.read()
 
-        header = "  file  " + file_name
+        header = "  file  " + file_name + " " + self.username + " "
         self.socket.sendall((str(len(file_data) + len(header))).encode("utf-8"))
         self.socket.sendall(header.encode("utf-8"))
         self.socket.sendall(file_data)
@@ -111,6 +116,8 @@ class ClientClass:
                     self.leave_room()
                 elif input == 'send':
                     self.send_file()
+                elif input == 'members':
+                    self.list_members()
                 else:
                     self.message(input)
             else:
