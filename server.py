@@ -48,6 +48,24 @@ def set_username(input):
         return lock, name
     else:
         return None, None
+
+# allows user to reset their name   
+def reset_name(input):
+    if input[0] == 'reset_name':
+        print("do I make it to the reset command")
+        old_name = input[1]
+        name = input[2]
+        cur = db.execute('SELECT name_id from names WHERE username = ?', [old_name])
+        
+        for id in cur.fetchall():
+            id = id[0]
+
+        db.execute('UPDATE names SET username = ? WHERE name_id = ?', [name , id])
+        db.commit()
+
+        return name, old_name
+    else:
+        return None, None
     
 # sends out a list of all of the users of the application
 def names(input):
@@ -367,6 +385,15 @@ class ChatRoom(socketserver.StreamRequestHandler):
                 message_length = str(message_length)
                 self.wfile.write(message_length.encode("utf-8"))
                 self.wfile.write(('Welcome '+ name).encode('utf-8'))
+                print(Dict)
+
+            new_name, old_name = reset_name(data_list)
+            if new_name != None:
+                Dict[new_name] = Dict[old_name]
+                message_length = len('Welcome '+ new_name)
+                message_length = str(message_length)
+                self.wfile.write(message_length.encode("utf-8"))
+                self.wfile.write(('Welcome '+ new_name).encode('utf-8'))
                 print(Dict)
             
             list_message = names(data_list)
