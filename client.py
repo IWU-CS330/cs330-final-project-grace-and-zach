@@ -10,17 +10,24 @@ PORT = 59898  # The port used by the server
 def receive_messages(socket):
     while True:
         data_length = socket.recv(6)
-        data = socket.recv(int(data_length))
+        #print("here is the data length:", data_length)
+        data = socket.recv(int(data_length.decode("utf-8")))
         data = data.decode('utf-8')
         if not data:
             break
         split_data = data.split()
+        print("split_Data:", split_data)
         if split_data[0] == 'file':
             with open(split_data[1], 'wb') as received_file:
                 #This may not work with file data
-                received_file.write(split_data[2])
+               data_length = socket.recv(20)
+             #print("here is the data length:", data_length)
+               data = socket.recv(int(data_length.decode("utf-8")))
+               for x in data:
+                    received_file.write(x)
         else:
             print(data)
+        
 
 def client_startup(socket):
     client = client_class.ClientClass()
