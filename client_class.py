@@ -46,11 +46,10 @@ class ClientClass:
         rooms: lists rooms
         join: joins chatroom
         members: lists members of room
-        file: sends a file
+        file: sends a file 
         leave: leaves room you are in
         close: closes connection
         send: sends a file
-        members: lists members of room
         help: lists all commands""")
 
     def list_names(self):
@@ -62,8 +61,9 @@ class ClientClass:
     def reset_name(self):
         # Resets name on client and server
         name = input("What would you like your new name to be?\n")
+        old_name = self.username
         self.username = name
-        message = "  reset_name  " + name + "\n"
+        message = "  reset_name  " + old_name + " " + name 
         message = str(len(message)) + message
         self.socket.sendall(message.encode('utf-8'))
 
@@ -105,7 +105,7 @@ class ClientClass:
     def send_file(self):
         # Finds the path and name of the file, then encrypts with available public keys
         # Then sends the unique encrypted file to its intended recievers 1 by 1
-        #self.socket.sendall("16 get_public_keys".encode('utf-8'))
+        self.socket.sendall("16 get_public_keys".encode('utf-8'))
         file_path = input("What is the path to the file you'd like to send?\n")
         file_name = input("What is the name of the file you'd like to send?\n")
         with open(file_path, 'rb') as file:
