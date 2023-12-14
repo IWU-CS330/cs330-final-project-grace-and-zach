@@ -46,10 +46,9 @@ class ClientClass:
         rooms: lists rooms
         join: joins chatroom
         members: lists members of room
-        file: sends a file 
+        send: sends a file 
         leave: leaves room you are in
         close: closes connection
-        send: sends a file
         help: lists all commands""")
 
     def list_names(self):
