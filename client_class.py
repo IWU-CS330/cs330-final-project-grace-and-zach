@@ -43,10 +43,10 @@ class ClientClass:
         help: lists all commands""")
 
     def list_names(self):
-        self.socket.sendall("7 names \n".encode('utf-8'))
+        self.socket.sendall("7 names".encode('utf-8'))
     
     def list_members(self):
-        self.socket.sendall("7 namesof \n".encode('utf-8'))
+        self.socket.sendall("7 namesof".encode('utf-8'))
 
     def reset_name(self):
         name = input("What would you like your new name to be?\n")
@@ -83,7 +83,7 @@ class ClientClass:
         self.socket.sendall("7  close".encode('utf-8'))
     
     def message(self, message):
-        self.socket.sendall("16 get_public_keys".encode('utf-8'))
+        self.socket.sendall(("50 get_public_keys " + self.username).encode('utf-8'))
         for key in self.public_keys:
             message = key.encrypt(
                 message,
